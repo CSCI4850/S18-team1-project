@@ -1,4 +1,5 @@
 import gym
+from DQNAgent import *
 
 
 
@@ -21,7 +22,19 @@ def main():
 
     # for data in ram
     env = gym.make("Breakout-ram-v4")
-    observation = env.reset() # This gets us the image
+
+    # returns a tuple, grab the first aspect (128)
+    input_shape = env.observation_space.shape[0]
+
+    # 4 total actions
+    action_space = env.action_space.n
+
+    print('RAM input:', input_shape, 'ACTION output', action_space)
+
+    agent = DQNAgent(input_shape, action_space)
+
+    # initialize the environment
+    observation = env.reset()
     
     # set an environemntal seed
     env.seed(0)
