@@ -42,10 +42,8 @@ def main():
     # flag for whether we die
     done = False
 
-    # total frames elapsed from the start
-    frames_elapsed = 0
 
-    while frames_elapsed in range(0,100):
+    for epoch in range(0,1000):
 
         # if we lose, reset the environment
         if done:

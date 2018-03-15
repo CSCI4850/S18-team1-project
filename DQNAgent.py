@@ -29,6 +29,8 @@ class DQNAgent():
         # build the model 
         self.model = self._build_model()
 
+        #self.model.load_weights('pong_weights-18-01-28-16-18.h5')
+
     def _build_model(self):
 
         model = Sequential()
@@ -61,6 +63,17 @@ class DQNAgent():
         self.model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+
+    ## hard exits the game
+    def quit(self):
+        # save the model
+        fn = 'weights/breakout-v4-ram-weights-' + str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) \
+             + '.h5'
+        self.agent.save(fn)
+        print('Saved breakout weights as',fn)
+        print('Exiting..')
+        pg.quit()
+        sys.exit()
 
     def load(self, name):
         self.model.load_weights(name)
