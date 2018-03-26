@@ -1,4 +1,5 @@
 from collections import deque
+import keras
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
@@ -9,12 +10,12 @@ import random
 
 # DQNAgent for breakout
 class DQNAgent():
-    def __init__(self, input_shape, action_space, model):
+    def __init__(self, input_shape, action_space, model='Dense'):
 
         # input layer into our first dense layer
-        #self.input_shape = input_shape
-        # with downsample:
-        self.input_shape = 80
+        self.input_shape = input_shape
+        # with downsample: (210, 160, 3) -> (105, 80)
+        #self.input_shape = 80
 
         # output layer mapped to an action
         self.action_space = action_space
@@ -35,22 +36,24 @@ class DQNAgent():
 
         if model is 'Dense':
             # build the dense model model 
-            self.model = self._build_Dense_model()
+            self.model = self.build_dense_model()
+
+        elif model is 'Convolutional':
+            # build the convolutional model 
+            self.model = self.build_convolutional_model()
 
         #self.model.load_weights('pong_weights-18-01-28-16-18.h5')
 
     # build the model
     # Input:  none
     # Output: Returns the built and compiled model
-    def _build_Dense_model(self):
+    def build_dense_model(self):
 
         # create a sequential, dqn model
         model = Sequential()
 
-        print(self.input_shape)
-
-        # 24 layer dense relu
-        model.add(Dense(48, input_dim=self.input_shape, activation='relu'))
+        # 24 layer dense relu, 128 input dimension
+        model.add(Dense(48, input_dim=1, activation='relu'))
 
         # another 24 dense relu
         model.add(Dense(24, activation='relu'))
@@ -59,12 +62,57 @@ class DQNAgent():
         model.add(Dense(self.action_space, activation='linear'))
 
         # compile the model
-        model.compile(loss='mse',
-                      optimizer=Adam(lr=self.learning_rate))
+        model.compile(loss = 'mse',
+                      optimizer = keras.optimizers.Adam(lr=self.learning_rate),
+                      metrics = ['accuracy'])
+
+        # show summary
+        model.summary()
 
         # return the built and compiled model
         return model
 
+
+    def build_convolutional_model(self):
+
+        # create a sequential, dqn model
+        model = Sequential()
+
+        # without downsample: (210, 160, 3)
+        #model.add(keras.layers.Conv2D(16, kernel_size = (4,4),
+        #                                  activation ='relu',
+        #                                  input_shape = self.input_shape))
+
+        # with downsample (105, 80, 1)
+
+        print(self.input_shape)
+        model.add(keras.layers.Conv2D(16, kernel_size = (4,4),
+                                          activation ='relu',
+                                          input_shape = (84, 84, 1) ))
+
+        #model.add(keras.layers.Flatten())
+
+          
+        # fed into a lower dimensional convolutional layer
+        model.add(keras.layers.Conv2D(8, (8,8), activation ='relu'))
+
+        # dense layer 64
+        model.add(keras.layers.Dense(32, activation = 'relu'))
+
+
+        # classify with softmax into a category
+        model.add(keras.layers.Dense(self.action_space, activation = 'softmax'))
+
+        # compile the model
+        model.compile(loss = keras.losses.categorical_crossentropy,
+                      optimizer = keras.optimizers.Adam(lr = self.learning_rate),
+                      metrics = ['accuracy'])
+
+        # show summary
+        model.summary()
+
+        # return the built and compiled model
+        return model
 
     # remembers by appending to the memory deque
     # Input:  state, action, reward value, the next state, and done flag
@@ -85,8 +133,15 @@ class DQNAgent():
         # otherwise,
         else:
             # act given a prediction
+            state = state.reshape(1,84,84,1)
             act_values = self.model.predict(state)
-            return np.argmax(act_values[0])             # returns action
+
+            decision = np.argmax(act_values[0])
+            if decision > 3:
+                print('Decision:', decision, 'supposed to be 0-3!')
+                decision = 0
+
+            return decision          # returns action
 
     # replays the past frames labeled by the batch size
     # Input:  Batch size of the most recent frames
@@ -96,27 +151,33 @@ class DQNAgent():
         # sets the minibatch from a random sample from the deque and batch size
         minibatch = random.sample(self.memory, batch_size)
 
-        # iterate over the minibatch and collect the reward as a targer
+        # iterate over the minibatch and collect the reward as a target
         for state, action, reward, next_state, done in minibatch:
             target = reward
 
-        # if we're not done
-        if not done:
-            # set a new target dependant on the reward
-            # added from gamma * the max of the prediction of what might be in the next state
-            target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
+            #print(next_state.shape)
+            #print(next_state)
 
-        # print that state
-        print(state)
+            next_state = next_state.reshape(1,84,84,1)
 
-        # set the finished target as a prediction of the current state
-        target_f = self.model.predict(state)
+            # if we're not done
+            if not done:
+                # set a new target dependant on the reward
+                # added from gamma * the max of the prediction of what might be in the next state
+                # Q-values for each action
+                target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
 
-        # set it as the target collected
-        target_f[0][action] = target
 
-        # fit our model with the a new target
-        self.model.fit(state, target_f, epochs=1, verbose=0)
+            state = state.reshape(1,84,84,1)
+
+            # set the finished target as a prediction of the current state
+            target_f = self.model.predict(state)
+
+            # set it as the target collected
+            target_f[0][action] = target
+
+            # fit our model with the a new target
+            self.model.fit(state, target_f, epochs=1, verbose=0)
 
         # if we're above the epsilon minimum,
         if self.epsilon > self.epsilon_min:
