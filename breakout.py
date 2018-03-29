@@ -11,15 +11,6 @@ WIDTH = 84
 def preprocess(img):
     return np.uint8(resize(rgb2gray(img), (HEIGHT, WIDTH), mode='reflect') * 255)
 
-
-def pp(observation):
-    observation = observation[32:-17, 8:-8]
-    img = image.array_to_img(observation, 'channels_last')
-    img = img.convert('L')
-    img = img.resize((HEIGHT,WIDTH))
-    observation = image.img_to_array(img, 'channels_last')
-    return np.squeeze(observation)
-
 def find_action(action):
     # actions:
     # 0: no-op 1: fire 2: right 3: left
@@ -31,6 +22,11 @@ def find_action(action):
         return 'move right'
     elif action is 3:
         return 'move left'
+
+def print_stats(epoch, done, action, reward, TOTAL_REWARD):
+    print('epoch:', epoch, 'done:', done,
+          'action:', find_action(action), 'reward:', reward, 
+          'total reward:', TOTAL_REWARD)
 
 def run(model, agent, env):
     # initialize an observation of the game
@@ -48,111 +44,83 @@ def run(model, agent, env):
 
     reward = 0
 
+    # episodes: defined as a full round of the game,
+    # from max lives to 0 lives or from a win of the round
+    episodes = 0
 
-    if model is 'Dense':
-        for epoch in range(0,MAX_FRAMES):
+    # frames: defined as the total number of frames elapsed
+    # a frame is one instance of each tick of the clock of the game
+    frames = 0
 
-            # if we run out of lives or win,
-            if done:
-                # reset the game
-                observation = env.reset()
+    # epochs: defined as the total number of epochs we train through
+    # starts at 0, ends at MAX_EPOCHS
+    epochs = 0
 
-            # pick an action
-            action = agent.act(frame)
+    # MAX_EPOCHS: defomed as as the maximum number of epochs
+    MAX_EPOCHS = 10
 
-            # collect the next frame frames, reward, and done flag
-            # and act upon the environment by stepping with some action
-            next_state, reward, done, _ = env.step(action)
-
-
-            # remember these states by adding it to the deque
-            agent.remember(state, action, reward, next_state, done)
-
-
-            # if the memory is bigger than the batch size (32)
-            if len(agent.memory) > agent.batch_size:
-                # pick some of the frames out of the memory deque
-                agent.replay(agent.batch_size)
-
-            # set the state from before
-            state = next_state
-
-            #print(processed_next_frame)
-            print('action:', find_action(action), 'reward:', reward)
-
-            env.render()        # renders each frame
+    # max lives: starts at 5
+    max_life = find_max_lifes(env)
 
 
     if model is 'Convolutional':
-        for epoch in range(0,MAX_FRAMES):
 
-            # if we run out of lives or win,
-            if done:
-                # reset the game
-                observation = env.reset()
+        while epochs < MAX_EPOCHS:
 
-            # process the frame
-            #processed_frame = frame
-            processed_frame = preprocess(frame)
-            #processed_frame = pp(frame)
-
-            # pick an action
-            action = agent.act(processed_frame)
+            # increase the number of episodes counter
+            episodes += 1
 
 
-            print('epoch:', epoch, 'done:', done,
-                  'action:', find_action(action), 'reward:', reward, 
-                  'total reward:', TOTAL_REWARD)
+            while not done:
 
-            # collect the next frame frames, reward, and done flag
-            # and act upon the environment by stepping with some action
-            next_frame, reward, done, info = env.step(action)
+                # increase the frame counter
+                frames += 1
 
-            # have a running total
-            TOTAL_REWARD += reward
+                # if we run out of lives or win,
+                if done:
+                    # reset the game
+                    observation = env.reset()
 
-            # preprocess the next frame
-            #processed_next_frame = next_frame
-            processed_next_frame = preprocess(next_frame)
-            #processed_next_frame = pp(next_frame)
+                # process the frame
+                processed_frame = preprocess(frame)
 
-            # remember these states by adding it to the deque
-            agent.remember(processed_frame, action, reward, processed_next_frame, done)
+                # pick an action
+                action = agent.act(processed_frame)
 
 
-            # if the memory is bigger than the batch size (32)
-            if len(agent.memory) > agent.batch_size:
-                # pick some of the frames out of the memory deque
-                agent.replay(agent.batch_size)
+                # prints our statistics
+                print_stats(epoch, done, action, reward, TOTAL_REWARD)
 
-            # set the frame from before
-            frame = next_frame
+                # collect the next frame frames, reward, and done flag
+                # and act upon the environment by stepping with some action
+                next_frame, reward, done, info = env.step(action)
 
-            #print(processed_next_frame)
+                # have a running total
+                TOTAL_REWARD += reward
+
+                # preprocess the next frame
+                processed_next_frame = preprocess(next_frame)
+
+                # remember these states by adding it to the deque
+                agent.remember(processed_frame, action, reward, processed_next_frame, done)
 
 
-            #env.render()        # renders each frame
+                # if the memory is bigger than the batch size (32)
+                if len(agent.memory) > agent.batch_size:
+                    # pick some of the frames out of the memory deque
+                    agent.replay(agent.batch_size)
+
+                # set the frame from before
+                frame = next_frame
+
+
+                #env.render()        # renders each frame
 
 def main():
-    # for image data
-    #env = gym.make('BreakoutDeterministic-v4') 
 
-
-    # choose a model!
-    # RAM?
-    #model = 'Dense'
-    # pixel/frame data?
     model = 'Convolutional'
 
-    if model is 'Dense':
-
-        # ram data
-        env = gym.make("Breakout-ram-v4")
-
-        # returns a tuple, 128 bytes
-        input_shape = env.observation_space.shape
-
-    elif model is 'Convolutional':
+    if model is 'Convolutional':
 
         # pixel/frame data
         env = gym.make("Breakout-v4")
@@ -167,8 +135,6 @@ def main():
     print('FRAME input:', input_shape, 'ACTION output:', action_space, 'MODEL used:', model)
 
     agent = DQNAgent(input_shape, action_space, model)
-
-
    
 
     # run the main loop of the game
