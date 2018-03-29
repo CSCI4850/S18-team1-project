@@ -24,7 +24,7 @@ class DQNAgent():
         self.learning_rate = 0.001
         self.epsilon = 1.0              # exploration rate
         self.epsilon_min = 0.01         # minimum exploration rate
-        self.epsilon_decay = 0.999      # decay rate for exploration
+        self.epsilon_decay = 0.999      # decay rate for exploration on each frame
         self.batch_size = 32            # batches
         self.gamma = 0.95               # discount rate
 
