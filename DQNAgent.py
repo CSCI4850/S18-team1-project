@@ -22,11 +22,15 @@ class DQNAgent():
 
         # hyper parameters for the DQN
         self.learning_rate = 0.001
-        self.epsilon = 1.0              # exploration rate
+        self.epsilon = 1.0              # exploration rate, start at 100%
         self.epsilon_min = 0.01         # minimum exploration rate
         self.epsilon_decay = 0.999      # decay rate for exploration on each frame
         self.batch_size = 32            # batches
-        self.gamma = 0.95               # discount rate
+        
+        # discount rate of rewards set between 0-1
+        # 0 meaning rewards only matter now, short term thinking
+        # 1 meaning rewards only matter no matter when you get them, long term thinking
+        self.gamma = 0.95
 
 
         self.memory_size = 1000000      # size of the deque
@@ -62,6 +66,7 @@ class DQNAgent():
         model.add(Dense(self.action_space, activation='linear'))
 
         # compile the model
+        # try mean squared error or logcosh, clog of hyperbolic cosine
         model.compile(loss = 'mse',
                       optimizer = keras.optimizers.Adam(lr=self.learning_rate),
                       metrics = ['accuracy'])
@@ -86,7 +91,7 @@ class DQNAgent():
         # with downsample (105, 80, 1)
 
         print(self.input_shape)
-        model.add(keras.layers.Conv2D(16, kernel_size = (4,4),
+        model.add(keras.layers.Conv2D(32, kernel_size = (4,4),
                                           activation ='relu',
                                           input_shape = (84, 84, 1) ))
 
@@ -94,17 +99,21 @@ class DQNAgent():
 
           
         # fed into a lower dimensional convolutional layer
-        model.add(keras.layers.Conv2D(8, (8,8), activation ='relu'))
+        model.add(keras.layers.Conv2D(64, (2,2), activation ='relu'))
+
+        # fed into a lower dimensional convolutional layer
+        model.add(keras.layers.Conv2D(64, (1,1), activation ='relu'))
+
+        model.add(keras.layers.Flatten())
 
         # dense layer 64
-        model.add(keras.layers.Dense(32, activation = 'relu'))
+        model.add(keras.layers.Dense(512, activation = 'relu'))
 
+        # classify with softmax into a category 
+        model.add(keras.layers.Dense(self.action_space, activation = 'linear'))
 
-        # classify with softmax into a category
-        model.add(keras.layers.Dense(self.action_space, activation = 'softmax'))
-
-        # compile the model
-        model.compile(loss = keras.losses.categorical_crossentropy,
+        # try mse, mean squared error or logcosh, log of hyperbolic cosine
+        model.compile(loss = keras.losses.logcosh,
                       optimizer = keras.optimizers.Adam(lr = self.learning_rate),
                       metrics = ['accuracy'])
 
@@ -189,13 +198,9 @@ class DQNAgent():
     # Input: None
     # Ouput: None, but saves and exits the game
     def quit(self):
-        
-        # set the file name
-        fn = 'weights/breakout-v4-ram-weights-' +                       \
-        str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
 
         # save the model
-        self.agent.save(fn)
+        self.agent.save()
 
         # exit
         print('Exiting..')
@@ -212,7 +217,10 @@ class DQNAgent():
     # saves the weights into a folder in ./weights/
     # Input:  filename 
     # Output: None, saves the file into a folder
-    def save(self, name):
-        print('Saving weights as: ', name)
-        self.model.save_weights(name)
+    def save(self):
+        # set the file name
+        fn = 'weights/final-breakout-v4-ram-weights-' +                  \
+        str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
+        print('Saving weights as: ', fn)
+        self.model.save_weights(fn)
 
