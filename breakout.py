@@ -60,7 +60,7 @@ def run(model, agent, env):
     MAX_EPOCHS = 10
 
     # max lives: starts at 5
-    max_life = find_max_lifes(env)
+    #max_life = find_max_lifes(env)
 
 
     if model is 'Convolutional':
@@ -70,16 +70,16 @@ def run(model, agent, env):
             # increase the number of episodes counter
             episodes += 1
 
+            # when we run out of lives or win a round
+            if done: 
+                # reset the game
+                observation = env.reset()
+
 
             while not done:
 
                 # increase the frame counter
                 frames += 1
-
-                # if we run out of lives or win,
-                if done:
-                    # reset the game
-                    observation = env.reset()
 
                 # process the frame
                 processed_frame = preprocess(frame)
@@ -87,9 +87,6 @@ def run(model, agent, env):
                 # pick an action
                 action = agent.act(processed_frame)
 
-
-                # prints our statistics
-                print_stats(epoch, done, action, reward, TOTAL_REWARD)
 
                 # collect the next frame frames, reward, and done flag
                 # and act upon the environment by stepping with some action
@@ -112,8 +109,14 @@ def run(model, agent, env):
 
                 # set the frame from before
                 frame = next_frame
+            
+
+            # prints our statistics
+            print_stats(epoch, done, action, reward, TOTAL_REWARD)
 
 
+            if epochs % 2 == 0 and epochs is not 0:
+                model.save()
                 #env.render()        # renders each frame
 
 def main():
