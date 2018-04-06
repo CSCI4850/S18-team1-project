@@ -1,3 +1,7 @@
+###-----------------------------------------###
+###          Breakout Main Loop             ###
+###-----------------------------------------###
+
 import gym
 from DQNAgent import *
 from ReplayMemory import *
@@ -157,7 +161,7 @@ def main():
 
     agent = DQNAgent(new_input_space, action_space, model)
     target_agent = DQNAgent(new_input_space, action_space, model)
-    memory = ReplayMemory(10000, new_input_space, action_space)
+    memory = ReplayMemory(hp['MEMORY_SIZE'], new_input_space, action_space)
    
     # run the main loop of the game
     run(model, agent, target_agent, memory, env)

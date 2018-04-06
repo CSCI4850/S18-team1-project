@@ -1,3 +1,7 @@
+###-----------------------------------------###
+###          Deep Q Agent Class             ###
+###-----------------------------------------###
+
 from collections import deque
 import keras
 from keras.models import Sequential
@@ -90,7 +94,7 @@ class DQNAgent():
         model.add(keras.layers.Dense(self.action_space, activation = 'linear'))
 
         # try mse, mean squared error or logcosh, log of hyperbolic cosine
-        model.compile(loss = keras.losses.logcosh,
+        model.compile(loss = keras.losses.logcosh if hp['LOSS_FUNCTION'] is 'logcosh' else 'mse',
                       optimizer = keras.optimizers.Adam(lr = hp['LEARNING_RATE']),
                       metrics = ['accuracy'])
 

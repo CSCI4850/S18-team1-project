@@ -1,10 +1,22 @@
+###------------------------------------------------------###
+###          Replay and Remember Memory Class            ###
+###------------------------------------------------------###
+
 import numpy as np
 
 class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
+
+        # set the state size, HEIGHT : default 84px
         self.state_size = state_size[0]
+
+        # set the action size, 4 actions
         self.action_size = action_size
+
+        # initial size
         self.size = 0
+
+        # set the max size of the replay memory as the 
         self.maxsize = memory_size
         self.current_index = 0
         self.current_state = np.zeros([memory_size, self.state_size])
