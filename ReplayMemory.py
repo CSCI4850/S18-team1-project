@@ -4,6 +4,8 @@
 
 import numpy as np
 
+from hyperparameters import *
+
 class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
 
@@ -16,14 +18,26 @@ class ReplayMemory:
         # initial size
         self.size = 0
 
-        # set the max size of the replay memory as the 
+        # set the max size of the remember and replay memory
         self.maxsize = memory_size
+
+        # default current index
         self.current_index = 0
+
+        # create the current state of the game (1,000,000, 64)
         self.current_state = np.zeros([memory_size, self.state_size])
-        self.action = [0]*memory_size # Remember, actions are integers...
-        self.reward = np.zeros([memory_size])
+
+        # create the next state of the game (1,000,000, 64)
         self.next_state = np.zeros([memory_size, self.state_size])
-        self.done = [False]*memory_size # Boolean (terminal transition?)
+
+        # reward array (1,000,000)
+        self.reward = np.zeros([memory_size])
+
+        # integer action
+        self.action = [0]*memory_size 
+
+        # Boolean (terminal transition?)
+        self.done = [False]*memory_size 
 
     def remember(self, current_state, action, reward, next_state, done):
         # Stores a single memory item
@@ -35,9 +49,17 @@ class ReplayMemory:
         self.current_index = (self.current_index+1)%self.maxsize
         self.size = max(self.current_index,self.size)
     
-    def replay(self, model, target_model, num_samples, sample_size, gamma):
+    def replay(self, model, target_model):
         # Run replay!
         
+        # set the number of samples to train on
+        num_samples = hp['REPLAY_ITERATIONS']
+
+        # set the sample size out of the memory bank 
+        sample_size = hp['REPLAY_SAMPLE_SIZE']
+        gamma = hp['GAMMA']
+        show_fit = hp['SHOW_FIT']
+
         # Can't train if we don't yet have enough samples to begin with...
         if self.size < sample_size:
             return
@@ -66,7 +88,7 @@ class ReplayMemory:
             
             # Update the weights accordingly
             model.fit(current_state,model_targets,
-                     epochs=1,verbose=0,batch_size=sample_size)
+                     epochs=1,verbose=show_fit,batch_size=sample_size)
             
         # Once we have finished training, update the target model
         target_model.set_weights(model.get_weights())

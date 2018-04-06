@@ -72,6 +72,7 @@ class DQNAgent():
         model = Sequential()
 
         # without downsample: (210, 160, 3)
+        # with downsample: (84, 84, 1)
         model.add(keras.layers.Conv2D(32, kernel_size = (4,4),
                                           activation ='relu',
                                           input_shape = self.input_shape ))
@@ -94,7 +95,9 @@ class DQNAgent():
         model.add(keras.layers.Dense(self.action_space, activation = 'linear'))
 
         # try mse, mean squared error or logcosh, log of hyperbolic cosine
-        model.compile(loss = keras.losses.logcosh if hp['LOSS_FUNCTION'] is 'logcosh' else 'mse',
+        model.compile(loss = keras.losses.logcosh if hp['LOSS'] is 'logcosh' 
+                        else keras.lossses.mse    if hp['LOSS'] is 'mse'
+                        else keras.losses.logcosh,
                       optimizer = keras.optimizers.Adam(lr = hp['LEARNING_RATE']),
                       metrics = ['accuracy'])
 
@@ -144,8 +147,9 @@ class DQNAgent():
     # Output: None, saves the file into a folder
     def save(self):
         # set the file name
-        fn = 'weights/final-breakout-v4-ram-weights-' +                  \
+        fn = 'weights/breakout-v4-weights-' + \
         str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
+
         print('Saving weights as: ', fn)
         self.model.save_weights(fn)
 
