@@ -13,6 +13,7 @@ from hyperparameters import *
 import numpy as np
 import random
 
+import pickle
 
 # DQNAgent for breakout
 class DQNAgent():
@@ -79,7 +80,6 @@ class DQNAgent():
 
         #model.add(keras.layers.Flatten())
 
-          
         # fed into a lower dimensional convolutional layer
         model.add(keras.layers.Conv2D(64, (2,2), activation ='relu'))
 
@@ -125,10 +125,15 @@ class DQNAgent():
     # hard exits the game
     # Input: None
     # Ouput: None, but saves and exits the game
-    def quit(self):
+    def quit(self, mean_times):
 
         # save the model
-        self.agent.save()
+        self.save()
+
+        print('Saving stats..')
+        # saving stats
+        with open('stats/mean_times.data', 'w') as f:
+            pickle.dump(mean_times, f)
 
         # exit
         print('Exiting..')

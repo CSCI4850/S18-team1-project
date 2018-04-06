@@ -10,7 +10,13 @@ class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
 
         # set the state size, HEIGHT : default 84px
-        self.state_size = state_size[0]
+        self.state_height = state_size[0]
+
+                # set the state size, HEIGHT : default 84px
+        self.state_width = state_size[1]
+
+                # set the state size, HEIGHT : default 84px
+        self.state_depth = state_size[2]
 
         # set the action size, 4 actions
         self.action_size = action_size
@@ -25,10 +31,10 @@ class ReplayMemory:
         self.current_index = 0
 
         # create the current state of the game (1,000,000, 64)
-        self.current_state = np.zeros([memory_size, self.state_size])
+        self.current_state = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth])
 
         # create the next state of the game (1,000,000, 64)
-        self.next_state = np.zeros([memory_size, self.state_size])
+        self.next_state = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth])
 
         # reward array (1,000,000)
         self.reward = np.zeros([memory_size])
@@ -57,7 +63,11 @@ class ReplayMemory:
 
         # set the sample size out of the memory bank 
         sample_size = hp['REPLAY_SAMPLE_SIZE']
+
+        # discount rate
         gamma = hp['GAMMA']
+
+        # show the learning fit
         show_fit = hp['SHOW_FIT']
 
         # Can't train if we don't yet have enough samples to begin with...
