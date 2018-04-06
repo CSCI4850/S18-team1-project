@@ -45,10 +45,13 @@ def plot_initial_graph(env):
     display(plt.gcf())
 
 
-def run(model, agent, target_agent, memory, env):
+def run(model, agent, target_agent, memory, env, mean_times):
+
+    # Peformance stats
+    times_window = deque(maxlen=100)
     
     # initialize an observation of the game
-    frame = state = env.reset()
+    current_frame = state = env.reset()
     
     # set an environemntal seed
     env.seed(0)
@@ -73,43 +76,38 @@ def run(model, agent, target_agent, memory, env):
     # total episodic reward: total reward for a certain episode
     episodic_reward = 0
 
+    # total frames elapsed in an episode
+    episodic_frame = 0
+
 
     if model is 'Convolutional':
 
 
         # iterate through a total amount of episodes
-        while total_episodes_elapsed < hp['MAX_EPISODES']:
+        for total_episodes_elapsed in range(hp['MAX_EPISODES']):
 
 
             # when to save the model
             if total_episodes_elapsed % hp['SAVE_MODEL'] == 0 and total_episodes_elapsed is not 0:
                 agent.save()
 
-            if total_frames_elapsed % hp['TARGET_UPDATE'] == 0 and total_frames_elapsed is not 0:
-                # update the target model
-                pass
-
-            # increase the number of episodes counter
-            total_episodes_elapsed += 1
 
             # when we run out of lives or win a round
             if done: 
                 
                 env.reset()           # reset the game
                 episodic_reward = 0   # reset the episodic reward
+                episodic_frame = 0    # reset the episodic frames
                 done = False          # reset the done flag
 
             # while the episode is not done,
             while not done:
 
-                # increase the frame counter
-                total_frames_elapsed += 1
-
                 # process the frame
-                processed_frame = preprocess(frame)
+                processed_current_frame = preprocess(current_frame)
 
                 # get Q value
-                Q = agent.model.predict(processed_frame)
+                Q = agent.model.predict(processed_current_frame)
 
                 # pick an action
                 action = agent.act(Q)
@@ -127,18 +125,31 @@ def run(model, agent, target_agent, memory, env):
                 # preprocess the next frame
                 processed_next_frame = preprocess(next_frame)
 
-                # remember these states by adding it to the deque
-                memory.replay(agent, target_agent)
+                # remember the current and next frame with their actions
+                memory.remember(processed_current_frame, action, reward, processed_next_frame, done)
+
+
+                # increase the frame counter
+                total_frames_elapsed += 1
+                episodic_frame += 1
+
+                if total_frames_elapsed % hp['TARGET_UPDATE'] == 0 and total_frames_elapsed is not 0:
+                    # update the target model
+                    memory.replay(agent.model, target_agent.model)
 
                 # apply exploration decay if epsilon is greater than epsilon min
                 if hp['EPSILON'] > hp['EPSILON_MIN']:
                     hp['EPSILON'] *= hp['EPSILON_DECAY']
 
                 # set the frame from before
-                frame = next_frame
+                current_frame = next_frame
 
                 if hp['RENDER_ENV'] is True:
                     env.render()        # renders each frame
+
+            times_window.append(episodic_frame)
+            mean_time = np.mean(times_window)
+            mean_times.append(mean_time)
 
             # prints our statistics
             print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward)
@@ -149,12 +160,10 @@ def main():
     # start time of the program
     start_time = time.time()
 
-
     model = 'Convolutional'
 
     # pixel/frame data
     env = gym.make("Breakout-v4")
-
 
     # 4 actions
     # 0: no-op 1: fire 2: right 3: left
@@ -164,13 +173,14 @@ def main():
     input_space = env.observation_space.shape[0]
 
     # create a new 3 dimensional space for a downscaled grayscale image
-    new_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], 1])
-
+    new_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], 1], dtype=np.uint8)
 
     # print the initial state
     print('FRAME input:', input_space, 'NEW input:', new_input_space,  
           'ACTION output:', action_space, 'MODEL used:', model)
 
+    # performance
+    mean_times = deque(maxlen=hp['MAX_EPISODES'])
 
     # create a DQN Agent
     agent = DQNAgent(new_input_space, action_space, model)
@@ -182,7 +192,7 @@ def main():
     memory = ReplayMemory(hp['MEMORY_SIZE'], new_input_space, action_space)
    
     # run the main loop of the game
-    run(model, agent, target_agent, memory, env)
+    run(model, agent, target_agent, memory, env, mean_times)
 
     # end time of the program
     end_time = time.time()
@@ -192,6 +202,9 @@ def main():
 
     # print the final time elapsed
     print('finished training in', time_elapsed, 'in seconds')
+
+    # save and quit
+    agent.quit(mean_times)
 
 
 # execute main

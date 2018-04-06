@@ -23,7 +23,7 @@ hp = {
                                       # default:
 
 	'TARGET_UPDATE' : 10000,      # on what mod epochs should we update the target network?
-                                      # default: 1000
+                                      # default: 10000
 
         ###-----------------------------------###
 	### hyper parameters for the DQNAgent ###
@@ -46,7 +46,7 @@ hp = {
         'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
 
-        'MEMORY_SIZE' : 1000000,       # size of the memory bank
+        'MEMORY_SIZE' : 200000,       # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.95,                # integration of rewards, discount factor, 
