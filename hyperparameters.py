@@ -31,7 +31,7 @@ hp = {
         ###-----------------------------------###
 	### hyper parameters for the DQNAgent ###
         ###-----------------------------------###
-        'WATCH_Q' : False,            # watch the Q function and see what decision it picks
+        'WATCH_Q' : True,            # watch the Q function and see what decision it picks
                                       # cool to watch
 
         'LEARNING_RATE' : 0.001,      # learning rate of the Adam optimizer

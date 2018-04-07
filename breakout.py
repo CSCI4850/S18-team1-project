@@ -31,11 +31,13 @@ def find_action(action):
     elif action is 3:
         return 'move left'
 
-def print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward):
+def print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward, avg_reward, avg_Q):
     print('total episodes elapsed:', total_episodes_elapsed,
-          'total frames elapsed:',   total_frames_elapsed,
-          'reward this episode:',    episodic_reward, 
-          'total reward:',           total_reward)
+          'total frames elapsed:',   total_frames_elapsed, 
+          'total reward:',           total_reward,
+          'reward this episode:',    episodic_reward,
+          'avg reward:',             avg_reward,
+          'avg Q:',                  avg_Q)
 
 def plot_initial_graph(env):
     plt.imshow(env.render(mode='rgb_array'))
@@ -78,13 +80,14 @@ def run(model, agent, target_agent, memory, env, mean_times):
     # total frames elapsed in an episode
     episodic_frame = 0
 
+    total_Q = 0
 
+    # change if we ever use a different model
     if model is 'Convolutional':
 
 
         # iterate through a total amount of episodes
         for total_episodes_elapsed in range(hp['MAX_EPISODES']):
-
 
             # when to save the model
             if total_episodes_elapsed % hp['SAVE_MODEL'] == 0 and total_episodes_elapsed is not 0:
@@ -97,6 +100,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 env.reset()           # reset the game
                 episodic_reward = 0   # reset the episodic reward
                 episodic_frame = 0    # reset the episodic frames
+                total_Q = 0  # reset the runnning total for the Q value
                 done = False          # reset the done flag
 
             # while the episode is not done,
@@ -109,7 +113,10 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 Q = agent.model.predict(processed_current_frame)
 
                 # pick an action
-                action = agent.act(Q)
+                Q, action = agent.act(Q)
+
+                # increase the total Q value
+                total_Q += Q
 
                 # collect the next frame frames, reward, and done flag
                 # and act upon the environment by stepping with some action
@@ -132,6 +139,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 total_frames_elapsed += 1
                 episodic_frame += 1
 
+                # when to learn and replay to update the model
                 if total_frames_elapsed % hp['TARGET_UPDATE'] == 0 and total_frames_elapsed is not 0:
                     # update the target model
                     memory.replay(agent.model, target_agent.model)
@@ -146,12 +154,16 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 if hp['RENDER_ENV'] is True:
                     env.render()        # renders each frame
 
+            # record
             times_window.append(episodic_frame)
             mean_time = np.mean(times_window)
             mean_times.append(mean_time)
 
+            avg_reward = total_reward/total_frames_elapsed
+            avg_Q = total_Q/total_frames_elapsed
+
             # prints our statistics
-            print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward)
+            print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward, avg_reward, avg_Q)
 
 
 def main():
