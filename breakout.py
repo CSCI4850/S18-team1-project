@@ -34,7 +34,6 @@ def find_action(action):
 def print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward):
     print('total episodes elapsed:', total_episodes_elapsed,
           'total frames elapsed:',   total_frames_elapsed,
-
           'reward this episode:',    episodic_reward, 
           'total reward:',           total_reward)
 
@@ -184,6 +183,9 @@ def main():
 
     # create a DQN Agent
     agent = DQNAgent(new_input_space, action_space, model)
+
+    if (hp['LOAD_WEIGHTS']):
+        agent.load(hp['LOAD_WEIGHTS'])
 
     # and a target DQN Agent
     target_agent = DQNAgent(new_input_space, action_space, model)

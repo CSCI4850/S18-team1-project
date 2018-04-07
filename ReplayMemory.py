@@ -12,10 +12,10 @@ class ReplayMemory:
         # set the state size, HEIGHT : default 84px
         self.state_height = state_size[0]
 
-                # set the state size, HEIGHT : default 84px
+        # set the state size, WIDTH : default 84px
         self.state_width = state_size[1]
 
-                # set the state size, HEIGHT : default 84px
+        # set the state size, DEPTH : default 1, grayscale
         self.state_depth = state_size[2]
 
         # set the action size, 4 actions

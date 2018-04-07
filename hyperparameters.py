@@ -7,6 +7,9 @@ hp = {
         ###-----------------------------------------###
         ### hyper parameters for the Main Game Loop ###
         ###-----------------------------------------###
+        'LOAD_WEIGHTS' : '',          # Loads weights into the model if so desired
+                                      # leave '' if starting from a new model
+
         'RENDER_ENV' : False,         # shows the screen of the game as it learns
                                       # massivly slows the training down when True
                                       # default: False
@@ -15,7 +18,7 @@ hp = {
         'WIDTH'  : 84,                # and width in pixels that the game window will get downscaled to
                                       # defaults: 84, 84
 	
-        'MAX_EPISODES' : 20,          # defined as how many cycles of full life to end life or
+        'MAX_EPISODES' : 10,          # defined as how many cycles of full life to end life or
                                       # winning a round
                                       # default: 
 
@@ -28,6 +31,9 @@ hp = {
         ###-----------------------------------###
 	### hyper parameters for the DQNAgent ###
         ###-----------------------------------###
+        'WATCH_Q' : False,            # watch the Q function and see what decision it picks
+                                      # cool to watch
+
         'LEARNING_RATE' : 0.001,      # learning rate of the Adam optimizer
                                       # default: 0.001
         

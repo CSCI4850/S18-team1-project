@@ -14,6 +14,7 @@ import numpy as np
 import random
 
 import pickle
+import datetime
 
 # DQNAgent for breakout
 class DQNAgent():
@@ -120,6 +121,9 @@ class DQNAgent():
         # otherwise,
         else:
             decision = np.argmax(Q)
+
+            if hp['WATCH_Q']:
+                print ('Q:', Q, 'decision:', decision)
             return decision          # returns action
 
     # hard exits the game
@@ -132,7 +136,7 @@ class DQNAgent():
 
         print('Saving stats..')
         # saving stats
-        with open('stats/mean_times.data', 'w') as f:
+        with open('stats/mean_times.data', 'wb') as f:
             pickle.dump(mean_times, f)
 
         # exit
@@ -144,6 +148,7 @@ class DQNAgent():
     # Input: filename input
     # Output: None
     def load(self, name):
+        name = 'weights/' + name 
         print('Loading weights from: ', name)
         self.model.load_weights(name)
 
