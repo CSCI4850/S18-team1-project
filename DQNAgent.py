@@ -16,6 +16,18 @@ import random
 import pickle
 import datetime
 
+def find_action(action):
+    # actions:
+    # 0: no-op 1: fire 2: right 3: left
+    if action is 0:
+        return 'no-op'
+    elif action is 1:
+        return 'fire'
+    elif action is 2:
+        return 'move right'
+    elif action is 3:
+        return 'move left'
+
 # DQNAgent for breakout
 class DQNAgent():
     def __init__(self, input_shape, action_space, model='Dense'):
@@ -116,15 +128,23 @@ class DQNAgent():
         # with some probability from our epsilon annealing,
         if np.random.rand() <= hp['EPSILON']:
             # select a random action
-            return random.randrange(self.action_space)   # returns action
+            rand = random.randrange(self.action_space)
+
+            # print q and decision
+            if hp['WATCH_Q']:
+                print ('Random Action! Q:', Q, 'decision:', find_action(rand))
+
+            return Q[0][rand], rand                  # returns action
 
         # otherwise,
         else:
             decision = np.argmax(Q)
 
+            # print q and decision
             if hp['WATCH_Q']:
-                print ('Q:', Q, 'decision:', decision)
-            return decision          # returns action
+                print ('Q:', Q, 'decision:', find_action(decision))
+
+            return Q[0][decision], decision          # returns action
 
     # hard exits the game
     # Input: None
@@ -141,7 +161,6 @@ class DQNAgent():
 
         # exit
         print('Exiting..')
-        pg.quit()
         sys.exit()
 
     # load the weights for the game from previous runs
