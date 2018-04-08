@@ -16,6 +16,8 @@ import random
 import pickle
 import datetime
 
+import sys
+
 def find_action(action):
     # actions:
     # 0: no-op 1: fire 2: right 3: left
