@@ -20,6 +20,7 @@ import datetime
 def find_action(action):
     # actions:
     # 0: no-op 1: fire 2: right 3: left
+    action = int(action)
     if action is 0:
         return 'no-op'
     elif action is 1:
@@ -38,15 +39,15 @@ class DQNAgent():
         self.input_shape = input_shape
 
         # output layer mapped to an action
-        self.action_space = action_space     
+        self.action_space = action_space
 
 
         if model is 'Dense':
-            # build the dense model model 
+            # build the dense model model
             self.model = self.build_dense_model()
 
         elif model is 'Convolutional':
-            # build the convolutional model 
+            # build the convolutional model
             self.model = self.build_convolutional_model()
 
         #self.model.load_weights('pong_weights-18-01-28-16-18.h5')
@@ -105,11 +106,11 @@ class DQNAgent():
         # dense layer 64
         model.add(keras.layers.Dense(512, activation = 'relu'))
 
-        # classify with softmax into a category 
+        # classify with softmax into a category
         model.add(keras.layers.Dense(self.action_space, activation = 'linear'))
 
         # try mse, mean squared error or logcosh, log of hyperbolic cosine
-        model.compile(loss = keras.losses.logcosh if hp['LOSS'] is 'logcosh' 
+        model.compile(loss = keras.losses.logcosh if hp['LOSS'] is 'logcosh'
                         else keras.lossses.mse    if hp['LOSS'] is 'mse'
                         else keras.losses.logcosh,
                       optimizer = keras.optimizers.Adam(lr = hp['LEARNING_RATE']),
@@ -168,12 +169,12 @@ class DQNAgent():
     # Input: filename input
     # Output: None
     def load(self, name):
-        name = 'weights/' + name 
+        name = 'weights/' + name
         print('Loading weights from: ', name)
         self.model.load_weights(name)
 
     # saves the weights into a folder in ./weights/
-    # Input:  filename 
+    # Input:  filename
     # Output: None, saves the file into a folder
     def save(self):
         # set the file name
@@ -182,4 +183,3 @@ class DQNAgent():
 
         print('Saving weights as: ', fn)
         self.model.save_weights(fn)
-
