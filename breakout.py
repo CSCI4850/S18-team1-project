@@ -19,21 +19,10 @@ def preprocess(img):
     img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH']), mode='reflect') * 255)
     return img.reshape(1,84,84,1)
 
-def find_action(action):
-    # actions:
-    # 0: no-op 1: fire 2: right 3: left
-    if action is 0:
-        return 'no-op'
-    elif action is 1:
-        return 'fire'
-    elif action is 2:
-        return 'move right'
-    elif action is 3:
-        return 'move left'
 
 def print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward, avg_reward, avg_Q):
     print('total episodes elapsed:', total_episodes_elapsed,
-          'total frames elapsed:',   total_frames_elapsed, 
+          'total frames elapsed:',   total_frames_elapsed,
           'total reward:',           total_reward,
           'reward this episode:',    episodic_reward,
           'avg reward:',             avg_reward,
@@ -50,10 +39,10 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
     # Peformance stats
     times_window = deque(maxlen=100)
-    
+
     # initialize an observation of the game
     current_frame = state = env.reset()
-    
+
     # set an environemntal seed
     env.seed(0)
 
@@ -95,8 +84,8 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
 
             # when we run out of lives or win a round
-            if done: 
-                
+            if done:
+
                 env.reset()           # reset the game
                 episodic_reward = 0   # reset the episodic reward
                 episodic_frame = 0    # reset the episodic frames
@@ -187,7 +176,7 @@ def main():
     new_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], 1], dtype=np.uint8)
 
     # print the initial state
-    print('FRAME input:', input_space, 'NEW input:', new_input_space,  
+    print('FRAME input:', input_space, 'NEW input:', new_input_space,
           'ACTION output:', action_space, 'MODEL used:', model)
 
     # performance
@@ -204,7 +193,7 @@ def main():
 
     # create a memory for remembering and replay
     memory = ReplayMemory(hp['MEMORY_SIZE'], new_input_space, action_space)
-   
+
     # run the main loop of the game
     run(model, agent, target_agent, memory, env, mean_times)
 
