@@ -20,9 +20,10 @@ def preprocess(img):
     return img.reshape(1,84,84,1)
 
 
-def print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward, avg_reward, avg_Q):
+def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, episodic_reward, total_reward, avg_reward, avg_Q):
     print('total episodes elapsed:', total_episodes_elapsed,
           'total frames elapsed:',   total_frames_elapsed,
+          'epsilon:',                epsilon,
           'total reward:',           total_reward,
           'reward this episode:',    episodic_reward,
           'avg reward:',             avg_reward,
@@ -152,7 +153,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
             avg_Q = total_Q/total_frames_elapsed
 
             # prints our statistics
-            print_stats(total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward, avg_reward, avg_Q)
+            print_stats(total_episodes_elapsed, total_frames_elapsed, hp['EPSILON'], episodic_reward, total_reward, avg_reward, avg_Q)
 
 
 def main():
