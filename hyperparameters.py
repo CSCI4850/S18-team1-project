@@ -17,6 +17,8 @@ hp = {
         'HEIGHT' : 84,                # height in pixels
         'WIDTH'  : 84,                # and width in pixels that the game window will get downscaled to
                                       # defaults: 84, 84
+
+        'FRAME_SKIP_SIZE' : 4,        
 	
         'MAX_EPISODES' : 10,          # defined as how many cycles of full life to end life or
                                       # winning a round
@@ -52,7 +54,7 @@ hp = {
         'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
 
-        'MEMORY_SIZE' : 200000,       # size of the memory bank
+        'MEMORY_SIZE' : 200000,        # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.95,                # integration of rewards, discount factor, 
