@@ -136,6 +136,12 @@ class DQNAgent():
             if hp['WATCH_Q']:
                 print ('Random Action! Q:', Q, 'decision:', find_action(rand))
 
+            # apply exploration decay if epsilon is greater than epsilon min
+            if hp['EPSILON'] > hp['EPSILON_MIN']:
+                hp['EPSILON'] *= hp['EPSILON_DECAY']
+            else
+                hp['EPSILON'] = hp['EPSILON_MIN']
+
             return Q[0][rand], rand                  # returns action
 
         # otherwise,
@@ -145,6 +151,12 @@ class DQNAgent():
             # print q and decision
             if hp['WATCH_Q']:
                 print ('Q:', Q, 'decision:', find_action(decision))
+
+             # apply exploration decay if epsilon is greater than epsilon min
+            if hp['EPSILON'] > hp['EPSILON_MIN']:
+                hp['EPSILON'] *= hp['EPSILON_DECAY']
+            else
+                hp['EPSILON'] = hp['EPSILON_MIN']
 
             return Q[0][decision], decision          # returns action
 
