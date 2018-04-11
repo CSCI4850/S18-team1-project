@@ -40,10 +40,6 @@ def init_frame_skip(past_frames_size, frame):
     for i in range(hp['FRAME_SKIP_SIZE']):
         past_frames_size[:, :, i] = preprocess(frame)
 
-def normalize_frames(current_frame_history):
-    # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
-    # normalize 0-255 -> 0-1 to reduce exploding gradient
-    return np.expand_dims(np.float32(current_frame_history) / 255., axis=0) 
 
 
 def run(model, agent, target_agent, memory, env, mean_times):
@@ -128,7 +124,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 # determine an action every 4 frames
                 if episodic_frame % hp['FRAME_SKIP_SIZE'] == 0:
                     # get Q value
-                    Q = agent.model.predict(normalize_frames(current_frame_history))
+                    Q = agent.model.predict(np.expand_dims(current_frame_history, axis=0))
 
                     # pick an action
                     Q, next_4_frame_action = agent.act(Q)

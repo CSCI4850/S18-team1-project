@@ -6,6 +6,11 @@ import numpy as np
 
 from hyperparameters import *
 
+def normalize_frames(current_frame_history):
+    # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
+    # normalize 0-255 -> 0-1 to reduce exploding gradient
+    return np.float32(current_frame_history) / 255.
+
 class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
 
@@ -90,14 +95,14 @@ class ReplayMemory:
             
             # Create targets from argmax(Q(s+1,a+1))
             # Use the target model!
-            targets = reward + gamma*np.amax(target_model.predict(next_state),axis=1)
+            targets = reward + gamma * np.amax(target_model.predict(next_state),axis=1)
             # Absorb the reward on terminal state-action transitions
             targets[done] = reward[done]
             # Update just the relevant parts of the model_target vector...
             model_targets[range(sample_size),action] = targets
             
             # Update the weights accordingly
-            model.fit(current_state,model_targets,
+            model.fit(normalize_frames(current_state), model_targets,
                      epochs=1,verbose=show_fit,batch_size=sample_size)
             
         # Once we have finished training, update the target model
