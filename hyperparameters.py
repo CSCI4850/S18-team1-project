@@ -27,7 +27,7 @@ hp = {
         'SAVE_MODEL' : 900,            # how many episodes should we go through until we save the model?
                                       # default:
 
-	'TARGET_UPDATE' : 1000,      # on what mod epochs should we update the target network?
+	'TARGET_UPDATE' : 10000,      # on what mod epochs should we update the target network?
                                       # default: 10000
 
         ###-----------------------------------###

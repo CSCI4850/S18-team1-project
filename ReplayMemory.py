@@ -9,7 +9,7 @@ from hyperparameters import *
 def normalize_frames(current_frame_history):
     # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
     # normalize 0-255 -> 0-1 to reduce exploding gradient
-    return np.float32(current_frame_history) / 255.
+    return np.dtype(float).type(current_frame_history) / 255.
 
 class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
@@ -56,7 +56,7 @@ class ReplayMemory:
         frame_state = np.zeros([84, 84, 5], dtype=np.uint8)
 
         # append the current state, 0, 1, 2, 3
-        frame_state[:, :, :3] = current_state
+        frame_state[:, :, 0:4] = current_state
         # get the last state, 4
         frame_state[:, :, 4] = next_state[:, :, 3]
 
@@ -89,16 +89,21 @@ class ReplayMemory:
         if self.size < sample_size:
             return
         
+        print('Starting replay..')
+        
         for i in range(num_samples):
+                
+            print('Replay:', i)
+            
             # Select sample_size memory indices from the whole set
             current_sample = np.random.choice(self.size, sample_size, replace=False)
             
             # Slice memory into training sample
             # current state is frames 0, 1, 2, 3
-            current_state = self.states[current_sample, :, 0:3]
+            current_state = self.states[current_sample, :, :, 0:4]
 
             # next_state is frames 1, 2, 3, 4
-            next_state = self.states[current_sample, :, 1:4]
+            next_state = self.states[current_sample, :, :, 1:5]
 
 
             action = [self.action[j] for j in current_sample]
