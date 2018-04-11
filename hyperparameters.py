@@ -20,20 +20,20 @@ hp = {
 
         'FRAME_SKIP_SIZE' : 4,        
 	
-        'MAX_EPISODES' : 10,          # defined as how many cycles of full life to end life or
+        'MAX_EPISODES' : 100,          # defined as how many cycles of full life to end life or
                                       # winning a round
                                       # default: 
 
-        'SAVE_MODEL' : 10,            # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 900,            # how many episodes should we go through until we save the model?
                                       # default:
 
-	'TARGET_UPDATE' : 10000,      # on what mod epochs should we update the target network?
+	'TARGET_UPDATE' : 1000,      # on what mod epochs should we update the target network?
                                       # default: 10000
 
         ###-----------------------------------###
 	### hyper parameters for the DQNAgent ###
         ###-----------------------------------###
-        'WATCH_Q' : True,            # watch the Q function and see what decision it picks
+        'WATCH_Q' : False,            # watch the Q function and see what decision it picks
                                       # cool to watch
 
         'LEARNING_RATE' : 0.001,      # learning rate of the Adam optimizer
@@ -61,10 +61,10 @@ hp = {
                                        # preference for present rewards as opposed to future rewards
                                        # default: 0.95
 
-        'REPLAY_ITERATIONS' : 100,     # how mant irerations of replay
+        'REPLAY_ITERATIONS' : 32,     # how mant irerations of replay
                                        # default: 100
 
-        'REPLAY_SAMPLE_SIZE' : 256     # how many frames from the state memory should we use
+        'REPLAY_SAMPLE_SIZE' : 32     # how many frames from the state memory should we use
                                        # default: 256
 
 }

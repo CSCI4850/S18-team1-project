@@ -127,6 +127,8 @@ class DQNAgent():
     # Output: returns the action taken
     def act(self, Q):
 
+        Q = np.expand_dims(Q, , axis=0)
+
         # with some probability from our epsilon annealing,
         if np.random.rand() <= hp['EPSILON']:
             # select a random action
