@@ -20,11 +20,11 @@ hp = {
 
         'FRAME_SKIP_SIZE' : 4,        
 	
-        'MAX_EPISODES' : 100,          # defined as how many cycles of full life to end life or
+        'MAX_EPISODES' : 200,          # defined as how many cycles of full life to end life or
                                       # winning a round
                                       # default: 
 
-        'SAVE_MODEL' : 900,            # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 99999,            # how many episodes should we go through until we save the model?
                                       # default:
 
 	'TARGET_UPDATE' : 10000,      # on what mod epochs should we update the target network?
@@ -36,8 +36,8 @@ hp = {
         'WATCH_Q' : False,            # watch the Q function and see what decision it picks
                                       # cool to watch
 
-        'LEARNING_RATE' : 0.001,      # learning rate of the Adam optimizer
-                                      # default: 0.001
+        'LEARNING_RATE' : 0.00025,      # learning rate of the Adam optimizer
+                                      # default: 0.00025
         
         'EPSILON' : 1.0,              # exploration rate, start at 100%
         'EPSILON_DECAY' : 0.999,      # decay rate for exploration on each frame
@@ -57,7 +57,7 @@ hp = {
         'MEMORY_SIZE' : 200000,        # size of the memory bank
                                        # default: 1,000,000
 
-        'GAMMA' : 0.95,                # integration of rewards, discount factor, 
+        'GAMMA' : 0.99,                # integration of rewards, discount factor, 
                                        # preference for present rewards as opposed to future rewards
                                        # default: 0.95
 

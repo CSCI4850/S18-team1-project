@@ -6,7 +6,7 @@ import numpy as np
 
 from hyperparameters import *
 
-def normalize_frames(current_frame_history):
+def normalize_states(current_frame_history):
     # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
     # normalize 0-255 -> 0-1 to reduce exploding gradient
     return np.dtype(float).type(current_frame_history) / 255.
@@ -99,11 +99,13 @@ class ReplayMemory:
             current_sample = np.random.choice(self.size, sample_size, replace=False)
             
             # Slice memory into training sample
-            # current state is frames 0, 1, 2, 3
-            current_state = self.states[current_sample, :, :, 0:4]
+            # current state is frames [0, 1, 2, 3]
+            # and normalize states [0,1] instead of 0-255
+            current_state = normalize_states(self.states[current_sample, :, :, 0:4])
 
-            # next_state is frames 1, 2, 3, 4
-            next_state = self.states[current_sample, :, :, 1:5]
+            # next_state is frames [1, 2, 3, 4]
+            # and normalize states [0,1] instead of 0-255
+            next_state = normalize_states(self.states[current_sample, :, :, 1:5])
 
 
             action = [self.action[j] for j in current_sample]
@@ -122,7 +124,7 @@ class ReplayMemory:
             model_targets[range(sample_size),action] = targets
             
             # Update the weights accordingly
-            model.fit(normalize_frames(current_state), model_targets,
+            model.fit(current_state, model_targets,
                      epochs=1,verbose=show_fit,batch_size=sample_size)
             
         # Once we have finished training, update the target model
