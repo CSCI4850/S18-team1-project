@@ -19,7 +19,7 @@ line_sep = '+-------------------------------------------------------------------
 def normalize_frames(current_frame_history):
     # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
     # normalize 0-255 -> 0-1 to reduce exploding gradient
-    return np.expand_dims(np.dtype(float).type(current_frame_history) / 255., axis=0)
+    return np.expand_dims(current_frame_history.astype(np.float32) / 255., axis=0)
 
 def preprocess(img):
     img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH']), mode='reflect') * 255)
@@ -34,7 +34,7 @@ def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, episodic_
           'reward this episode: {4:3.0f} | ' 
           'avg reward: {5:3.5f} | '             
           'avg Q: {6:3.5f}\n'.format(total_episodes_elapsed, total_frames_elapsed, 
-                            epsilon, episodic_reward, total_reward, avg_reward, avg_Q))
+                            epsilon, total_reward, episodic_reward ,avg_reward, avg_Q))
     print(line_sep)
 
 def plot_initial_graph(env):
@@ -143,6 +143,10 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
                 # episodic reward
                 episodic_reward += reward
+                
+                # clip the reward between [-1, 1]
+                # may or may not affect breakout
+                #reward = np.clip(reward, -1, 1)
 
                 # preprocess the next frame
                 processed_next_frame = preprocess(next_frame)

@@ -24,7 +24,7 @@ hp = {
                                       # winning a round
                                       # default: 
 
-        'SAVE_MODEL' : 50,            # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 201,            # how many episodes should we go through until we save the model?
                                       # default:
 
 	'TARGET_UPDATE' : 10000,      # on what mod epochs should we update the target network?
@@ -53,7 +53,7 @@ hp = {
         ###----------------------------------------###
         ### hyper parameters for the Replay Memory ###
         ###----------------------------------------###
-        'SHOW_FIT' : 1,                # shows the fit of the model and it's work, turn to 0 for off
+        'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
     
         'REPLAY_START' : 50000,        # when to start using replay to update the model

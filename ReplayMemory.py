@@ -9,7 +9,7 @@ from hyperparameters import *
 def normalize_states(current_frame_history):
     # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
     # normalize 0-255 -> 0-1 to reduce exploding gradient
-    return np.dtype(float).type(current_frame_history) / 255.
+    return current_frame_history.astype(np.float32) / 255.
 
 class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
@@ -88,7 +88,7 @@ class ReplayMemory:
         # Can't train if we don't yet have enough samples to begin with...
         if self.size < sample_size:
             return
-                
+            
         for i in range(num_samples):
                             
             # Select sample_size memory indices from the whole set
