@@ -25,13 +25,13 @@ def preprocess(img):
 
 
 def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, episodic_reward, total_reward, avg_reward, avg_Q):
-    print('total episodes elapsed:', total_episodes_elapsed,
-          'total frames elapsed:',   total_frames_elapsed,
-          'epsilon:',                epsilon,
-          'total reward:',           total_reward,
-          'reward this episode:',    episodic_reward,
-          'avg reward:',             avg_reward,
-          'avg Q:',                  avg_Q)
+    print('episodes elapsed: {0:5d} | '
+          'frames elapsed: {1:9d} | '
+          'epsilon: {2:6f} | '
+          'total reward: {3:5d} | '
+          'reward this episode: {4:3d} | '
+          'avg reward: {5:5d}'
+          'avg Q: {6:6f}').format(total_episodes_elapsed, total_frames_elapsed, epsilon,                   episodic_reward, total_reward, avg_reward, avg_Q)
 
 def plot_initial_graph(env):
     plt.imshow(env.render(mode='rgb_array'))

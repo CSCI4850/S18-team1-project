@@ -117,11 +117,14 @@ class ReplayMemory:
             # Absorb the reward on terminal state-action transitions
             targets[done] = reward[done]
             # Update just the relevant parts of the model_target vector...
-            model_targets[range(sample_size),action] = targets
+            model_targets[range(sample_size), action] = targets
             
+            # Current State: (32, 84, 84, 4)
+            # Model Targets: (32, 4)
+
             # Update the weights accordingly
             model.fit(current_state, model_targets,
-                     epochs=1,verbose=show_fit,batch_size=sample_size)
+                     epochs=1 ,verbose=show_fit, batch_size=sample_size)
             
  
     def target_update(self, model, target_model):

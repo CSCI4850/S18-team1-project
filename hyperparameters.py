@@ -24,7 +24,7 @@ hp = {
                                       # winning a round
                                       # default: 
 
-        'SAVE_MODEL' : 99999,            # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 50,            # how many episodes should we go through until we save the model?
                                       # default:
 
 	'TARGET_UPDATE' : 10000,      # on what mod epochs should we update the target network?
@@ -53,10 +53,10 @@ hp = {
         ###----------------------------------------###
         ### hyper parameters for the Replay Memory ###
         ###----------------------------------------###
-        'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
+        'SHOW_FIT' : 1,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
     
-        'REPLAY_START' : 50000,        # when to start using replay to update the model
+        'REPLAY_START' : 1,        # when to start using replay to update the model
 
         'MEMORY_SIZE' : 400000,        # size of the memory bank
                                        # default: 1,000,000
@@ -65,10 +65,10 @@ hp = {
                                        # preference for present rewards as opposed to future rewards
                                        # default: 0.95
 
-        'REPLAY_ITERATIONS' : 32,     # how mant irerations of replay
+        'REPLAY_ITERATIONS' : 4,     # how mant irerations of replay
                                        # default: 100
 
-        'REPLAY_SAMPLE_SIZE' : 32     # how many frames from the state memory should we use
+        'REPLAY_SAMPLE_SIZE' : 8     # how many frames from the state memory should we use
                                        # default: 256
 
 }
