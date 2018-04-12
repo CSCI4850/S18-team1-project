@@ -14,6 +14,8 @@ from skimage.transform import resize
 from skimage.color import rgb2gray
 from keras.preprocessing import image
 
+line_sep = '+----------------------------------------------------------------------------------------+'
+
 def normalize_frames(current_frame_history):
     # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
     # normalize 0-255 -> 0-1 to reduce exploding gradient
@@ -27,12 +29,13 @@ def preprocess(img):
 def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, episodic_reward, total_reward, avg_reward, avg_Q):
     print('\nepisodes elapsed: {0:5d} | '    
           'frames elapsed: {1:7d} | '      
-          'epsilon: {2:6.0f} | '             
-          'total reward: {3:3.0f} | \n'        
+          'epsilon: {2:1.5f} | '             
+          'total reward: {3:3.0f}\n'        
           'reward this episode: {4:3.0f} | ' 
           'avg reward: {5:3.5f} | '             
           'avg Q: {6:3.5f}\n'.format(total_episodes_elapsed, total_frames_elapsed, 
-                                  epsilon, episodic_reward, total_reward, avg_reward, avg_Q))
+                            epsilon, episodic_reward, total_reward, avg_reward, avg_Q))
+    print(line_sep)
 
 def plot_initial_graph(env):
     plt.imshow(env.render(mode='rgb_array'))
