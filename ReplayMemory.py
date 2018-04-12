@@ -88,13 +88,9 @@ class ReplayMemory:
         # Can't train if we don't yet have enough samples to begin with...
         if self.size < sample_size:
             return
-        
-        print('Starting replay..')
-        
-        for i in range(num_samples):
                 
-            print('Replay:', i)
-            
+        for i in range(num_samples):
+                            
             # Select sample_size memory indices from the whole set
             current_sample = np.random.choice(self.size, sample_size, replace=False)
             
@@ -127,6 +123,8 @@ class ReplayMemory:
             model.fit(current_state, model_targets,
                      epochs=1,verbose=show_fit,batch_size=sample_size)
             
-        # Once we have finished training, update the target model
+ 
+    def target_update(self, model, target_model):
+        print('Updating target model weights from model weights')
+        # target model weights <- model weights
         target_model.set_weights(model.get_weights())
-

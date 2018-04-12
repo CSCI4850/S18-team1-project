@@ -89,21 +89,26 @@ class DQNAgent():
 
         # without downsample: (210, 160, 3)
         # with downsample: (84, 84, 1)
-        model.add(keras.layers.Conv2D(32, kernel_size = (4,4),
-                                          activation ='relu',
+        model.add(keras.layers.Conv2D(32, kernel_size = (8,8),
+                                          strides = 4,
+                                          activation = 'relu',
                                           input_shape = self.input_shape ))
 
         #model.add(keras.layers.Flatten())
 
         # fed into a lower dimensional convolutional layer
-        model.add(keras.layers.Conv2D(64, (2,2), activation ='relu'))
+        model.add(keras.layers.Conv2D(64, kernel_size = (4,4),
+                                          strides = 2, 
+                                          activation = 'relu'))
 
         # fed into a lower dimensional convolutional layer
-        model.add(keras.layers.Conv2D(64, (1,1), activation ='relu'))
+        model.add(keras.layers.Conv2D(64, kernel_size = (3,3),
+                                          strides = 1,
+                                          activation = 'relu'))
 
         model.add(keras.layers.Flatten())
 
-        # dense layer 64
+        # dense layer 512
         model.add(keras.layers.Dense(512, activation = 'relu'))
 
         # classify with softmax into a category
@@ -113,8 +118,10 @@ class DQNAgent():
         model.compile(loss = keras.losses.logcosh if hp['LOSS'] is 'logcosh'
                         else keras.lossses.mse    if hp['LOSS'] is 'mse'
                         else keras.losses.logcosh,
-                      optimizer = keras.optimizers.Adam(lr = hp['LEARNING_RATE']),
-                      metrics = ['accuracy'])
+        optimizer = keras.optimizers.Adam(lr = hp['LEARNING_RATE']) if hp['OPTIMIZER'] is 'Adam'
+               else keras.optimizers.RMSprop(lr = hp['LEARNING_RATE']) if hp['OPTIMIZER'] is 'RMSProp'
+               else keras.optimizers.Adam(lr = hp['LEARNING_RATE']), 
+        metrics = ['accuracy'])
 
         # show summary
         model.summary()

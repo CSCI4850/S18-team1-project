@@ -43,6 +43,8 @@ hp = {
         'EPSILON_DECAY' : 0.999,      # decay rate for exploration on each frame
         'EPSILON_MIN' : 0.01,         # minimum exploration rate
                                       # defaults: 1.0, 0.999, 0.01
+    
+        'OPTIMIZER' : 'Adam',          # optimizer used
 
         'LOSS' : 'logcosh',           # can be 'logcosh' for logarithm of hyperbolic cosine
                                       # or 'mse' for mean squared error
@@ -53,8 +55,10 @@ hp = {
         ###----------------------------------------###
         'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
+    
+        'REPLAY_START' : 50000,        # when to start using replay to update the model
 
-        'MEMORY_SIZE' : 200000,        # size of the memory bank
+        'MEMORY_SIZE' : 400000,        # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 
