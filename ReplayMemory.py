@@ -66,7 +66,7 @@ class ReplayMemory:
 
         self.action[self.current_index] = action
         self.reward[self.current_index] = reward
-        self.lost_life[self.current_index] = done
+        self.lost_life[self.current_index] = lost_life
         self.current_index = (self.current_index+1)%self.maxsize
         self.size = max(self.current_index,self.size)
     

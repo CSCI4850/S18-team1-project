@@ -55,7 +55,7 @@ def find_max_lives(env):
 
 
 def check_lives(life, current_life):
-    return True if life > current_life else return False
+    return ( True if life > current_life else False )
 
 
 
@@ -94,7 +94,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
     episodic_frame = 0
     
     # initialize lives to the maximum
-    lives = find_max_lives(env)
+    lives = max_lives = find_max_lives(env)
 
     frame_history = np.zeros([84, 84, 5], dtype=np.uint8)
 
