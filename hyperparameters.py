@@ -56,7 +56,7 @@ hp = {
         'SHOW_FIT' : 1,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
     
-        'REPLAY_START' : 1,        # when to start using replay to update the model
+        'REPLAY_START' : 50000,        # when to start using replay to update the model
 
         'MEMORY_SIZE' : 400000,        # size of the memory bank
                                        # default: 1,000,000
