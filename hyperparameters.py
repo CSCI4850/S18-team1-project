@@ -20,11 +20,11 @@ hp = {
 
         'FRAME_SKIP_SIZE' : 4,        
 	
-        'MAX_EPISODES' : 10,          # defined as how many cycles of full life to end life or
+        'MAX_EPISODES' : 200,          # defined as how many cycles of full life to end life or
                                       # winning a round
                                       # default: 
 
-        'SAVE_MODEL' : 10,            # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 50,            # how many episodes should we go through until we save the model?
                                       # default:
 
 	'TARGET_UPDATE' : 10000,      # on what mod epochs should we update the target network?
@@ -33,16 +33,18 @@ hp = {
         ###-----------------------------------###
 	### hyper parameters for the DQNAgent ###
         ###-----------------------------------###
-        'WATCH_Q' : True,            # watch the Q function and see what decision it picks
+        'WATCH_Q' : False,            # watch the Q function and see what decision it picks
                                       # cool to watch
 
-        'LEARNING_RATE' : 0.001,      # learning rate of the Adam optimizer
-                                      # default: 0.001
+        'LEARNING_RATE' : 0.00025,      # learning rate of the Adam optimizer
+                                      # default: 0.00025
         
         'EPSILON' : 1.0,              # exploration rate, start at 100%
         'EPSILON_DECAY' : 0.999,      # decay rate for exploration on each frame
         'EPSILON_MIN' : 0.01,         # minimum exploration rate
                                       # defaults: 1.0, 0.999, 0.01
+    
+        'OPTIMIZER' : 'Adam',          # optimizer used
 
         'LOSS' : 'logcosh',           # can be 'logcosh' for logarithm of hyperbolic cosine
                                       # or 'mse' for mean squared error
@@ -51,20 +53,22 @@ hp = {
         ###----------------------------------------###
         ### hyper parameters for the Replay Memory ###
         ###----------------------------------------###
-        'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
+        'SHOW_FIT' : 1,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
+    
+        'REPLAY_START' : 1,        # when to start using replay to update the model
 
-        'MEMORY_SIZE' : 200000,        # size of the memory bank
+        'MEMORY_SIZE' : 400000,        # size of the memory bank
                                        # default: 1,000,000
 
-        'GAMMA' : 0.95,                # integration of rewards, discount factor, 
+        'GAMMA' : 0.99,                # integration of rewards, discount factor, 
                                        # preference for present rewards as opposed to future rewards
                                        # default: 0.95
 
-        'REPLAY_ITERATIONS' : 100,     # how mant irerations of replay
+        'REPLAY_ITERATIONS' : 4,     # how mant irerations of replay
                                        # default: 100
 
-        'REPLAY_SAMPLE_SIZE' : 256     # how many frames from the state memory should we use
+        'REPLAY_SAMPLE_SIZE' : 8     # how many frames from the state memory should we use
                                        # default: 256
 
 }

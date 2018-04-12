@@ -14,6 +14,10 @@ from skimage.transform import resize
 from skimage.color import rgb2gray
 from keras.preprocessing import image
 
+def normalize_frames(current_frame_history):
+    # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
+    # normalize 0-255 -> 0-1 to reduce exploding gradient
+    return np.expand_dims(np.dtype(float).type(current_frame_history) / 255., axis=0)
 
 def preprocess(img):
     img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH']), mode='reflect') * 255)
@@ -21,13 +25,13 @@ def preprocess(img):
 
 
 def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, episodic_reward, total_reward, avg_reward, avg_Q):
-    print('total episodes elapsed:', total_episodes_elapsed,
-          'total frames elapsed:',   total_frames_elapsed,
-          'epsilon:',                epsilon,
-          'total reward:',           total_reward,
-          'reward this episode:',    episodic_reward,
-          'avg reward:',             avg_reward,
-          'avg Q:',                  avg_Q)
+    print('episodes elapsed: {0:5d} | '
+          'frames elapsed: {1:9d} | '
+          'epsilon: {2:6f} | '
+          'total reward: {3:5d} | '
+          'reward this episode: {4:3d} | '
+          'avg reward: {5:5d}'
+          'avg Q: {6:6f}').format(total_episodes_elapsed, total_frames_elapsed, epsilon,                   episodic_reward, total_reward, avg_reward, avg_Q)
 
 def plot_initial_graph(env):
     plt.imshow(env.render(mode='rgb_array'))
@@ -40,10 +44,6 @@ def init_frame_skip(past_frames_size, frame):
     for i in range(hp['FRAME_SKIP_SIZE']):
         past_frames_size[:, :, i] = preprocess(frame)
 
-def normalize_frames(current_frame_history):
-    # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
-    # normalize 0-255 -> 0-1 to reduce exploding gradient
-    return np.expand_dims(np.float32(current_frame_history) / 255., axis=0) 
 
 
 def run(model, agent, target_agent, memory, env, mean_times):
@@ -80,6 +80,8 @@ def run(model, agent, target_agent, memory, env, mean_times):
     # total frames elapsed in an episode
     episodic_frame = 0
 
+    frame_history = np.zeros([84, 84, 5], dtype=np.uint8)
+
     current_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
 
     next_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
@@ -109,21 +111,12 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 done = False          # reset the done flag
 
 
-                current_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
-                next_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
-
             init_frame_skip(current_frame_history, current_frame)
             init_frame_skip(next_frame_history, current_frame)
 
 
             # while the episode is not done,
             while not done:
-
-                # process the frame
-                processed_current_frame = preprocess(current_frame)
-
-                # add the new processed frame to the last slot of the depth
-                current_frame_history[:, :, 3] = processed_current_frame
 
                 # determine an action every 4 frames
                 if episodic_frame % hp['FRAME_SKIP_SIZE'] == 0:
@@ -135,6 +128,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
                     # increase the total Q value
                     total_Q += Q
+
 
                 # collect the next frame frames, reward, and done flag
                 # and act upon the environment by stepping with some action
@@ -149,9 +143,11 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 # preprocess the next frame
                 processed_next_frame = preprocess(next_frame)
 
-                # add the next frame
-                next_frame_history[:, :, 3] = processed_next_frame
+                # add the next frame, 4th item is new frame
+                frame_history[:, :, 4] = processed_next_frame
 
+                # [1, 2, 3, 4], 4 frames
+                next_frame_history = frame_history[:, :, 1:]
 
                 # remember the current and next frame with their actions
                 memory.remember(current_frame_history, next_4_frame_action, reward, next_frame_history, done)
@@ -160,17 +156,19 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 total_frames_elapsed += 1
                 episodic_frame += 1
 
-                # set the frame from before
-                current_frame = next_frame
-                
-                current_frame_history[:, :, :3] = current_frame_history[:, :, 1:]
-                next_frame_history[:, :, :3] = next_frame_history[:, :, 1:]
-
-                # when to learn and replay to update the model
-                if total_frames_elapsed % hp['TARGET_UPDATE'] == 0:
-                    # update the target model
+                # current is now the next frame
+                current_frame_history = next_frame_history
+                # update frame history
+                # [0, 1, 2, 3] <- [1, 2, 3, 4]
+                frame_history[:, :, :4] = frame_history[:, :, 1:]
+    
+                if total_frames_elapsed > hp['REPLAY_START']:
                     memory.replay(agent.model, target_agent.model)
-
+        
+                    # when to learn and replay to update the model
+                    if total_frames_elapsed % hp['TARGET_UPDATE'] == 0:
+                        # update the target model
+                        memory.target_udpate(agent.model, target_agent.model)
 
                 if hp['RENDER_ENV'] is True:
                     env.render()        # renders each frame

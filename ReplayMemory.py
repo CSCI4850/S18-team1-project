@@ -6,6 +6,11 @@ import numpy as np
 
 from hyperparameters import *
 
+def normalize_states(current_frame_history):
+    # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
+    # normalize 0-255 -> 0-1 to reduce exploding gradient
+    return np.dtype(float).type(current_frame_history) / 255.
+
 class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
 
@@ -15,8 +20,11 @@ class ReplayMemory:
         # set the state size, WIDTH : default 84px
         self.state_width = state_size[1]
 
-        # set the state size, DEPTH : default 1, grayscale
-        self.state_depth = state_size[2]
+        # set the state size, DEPTH : default 4, for 4 frames
+        # we then extend it to make room for the current and next frame
+        # current frame: [0, 1, 2, 3]
+        # next frame: [1, 2, 3, 4]
+        self.state_depth = state_size[2] + 1 
 
         # set the action size, 4 actions
         self.action_size = action_size
@@ -31,10 +39,7 @@ class ReplayMemory:
         self.current_index = 0
 
         # create the current state of the game (1,000,000, 64)
-        self.current_state = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth])
-
-        # create the next state of the game (1,000,000, 64)
-        self.next_state = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth])
+        self.states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth])
 
         # reward array (1,000,000)
         self.reward = np.zeros([memory_size])
@@ -46,11 +51,21 @@ class ReplayMemory:
         self.done = [False]*memory_size 
 
     def remember(self, current_state, action, reward, next_state, done):
+
+        # create an extended frame state
+        frame_state = np.zeros([84, 84, 5], dtype=np.uint8)
+
+        # append the current state, 0, 1, 2, 3
+        frame_state[:, :, 0:4] = current_state
+        # get the last state, 4
+        frame_state[:, :, 4] = next_state[:, :, 3]
+
+
         # Stores a single memory item
-        self.current_state[self.current_index,:] = current_state
+        self.states[self.current_index,:] = frame_state
+
         self.action[self.current_index] = action
         self.reward[self.current_index] = reward
-        self.next_state[self.current_index,:] = next_state
         self.done[self.current_index] = done
         self.current_index = (self.current_index+1)%self.maxsize
         self.size = max(self.current_index,self.size)
@@ -73,16 +88,24 @@ class ReplayMemory:
         # Can't train if we don't yet have enough samples to begin with...
         if self.size < sample_size:
             return
-        
+                
         for i in range(num_samples):
+                            
             # Select sample_size memory indices from the whole set
-            current_sample = np.random.choice(self.size,sample_size,replace=False)
+            current_sample = np.random.choice(self.size, sample_size, replace=False)
             
             # Slice memory into training sample
-            current_state = self.current_state[current_sample,:]
+            # current state is frames [0, 1, 2, 3]
+            # and normalize states [0,1] instead of 0-255
+            current_state = normalize_states(self.states[current_sample, :, :, 0:4])
+
+            # next_state is frames [1, 2, 3, 4]
+            # and normalize states [0,1] instead of 0-255
+            next_state = normalize_states(self.states[current_sample, :, :, 1:5])
+
+
             action = [self.action[j] for j in current_sample]
             reward = self.reward[current_sample]
-            next_state = self.next_state[current_sample,:]
             done = [self.done[j] for j in current_sample]
             
             # Obtain model's current Q-values
@@ -90,16 +113,21 @@ class ReplayMemory:
             
             # Create targets from argmax(Q(s+1,a+1))
             # Use the target model!
-            targets = reward + gamma*np.amax(target_model.predict(next_state),axis=1)
+            targets = reward + gamma * np.amax(target_model.predict(next_state),axis=1)
             # Absorb the reward on terminal state-action transitions
             targets[done] = reward[done]
             # Update just the relevant parts of the model_target vector...
-            model_targets[range(sample_size),action] = targets
+            model_targets[range(sample_size), action] = targets
             
-            # Update the weights accordingly
-            model.fit(current_state,model_targets,
-                     epochs=1,verbose=show_fit,batch_size=sample_size)
-            
-        # Once we have finished training, update the target model
-        target_model.set_weights(model.get_weights())
+            # Current State: (32, 84, 84, 4)
+            # Model Targets: (32, 4)
 
+            # Update the weights accordingly
+            model.fit(current_state, model_targets,
+                     epochs=1 ,verbose=show_fit, batch_size=sample_size)
+            
+ 
+    def target_update(self, model, target_model):
+        print('Updating target model weights from model weights')
+        # target model weights <- model weights
+        target_model.set_weights(model.get_weights())
