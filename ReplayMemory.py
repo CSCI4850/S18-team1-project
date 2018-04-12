@@ -106,7 +106,7 @@ class ReplayMemory:
 
             action = [self.action[j] for j in current_sample]
             reward = self.reward[current_sample]
-            done = [self.done[j] for j in current_sample]
+            lost_life = [self.lost_life[j] for j in current_sample]
             
             # Obtain model's current Q-values
             model_targets = model.predict(current_state)
@@ -115,7 +115,7 @@ class ReplayMemory:
             # Use the target model!
             targets = reward + gamma * np.amax(target_model.predict(next_state),axis=1)
             # Absorb the reward on terminal state-action transitions
-            targets[done] = reward[done]
+            targets[lost_life] = reward[lost_life]
             # Update just the relevant parts of the model_target vector...
             model_targets[range(sample_size), action] = targets
             
