@@ -47,6 +47,15 @@ def plot_initial_graph(env):
 def init_frame_skip(past_frames_size, frame):
     for i in range(hp['FRAME_SKIP_SIZE']):
         past_frames_size[:, :, i] = preprocess(frame)
+        
+def find_max_lives(env):
+    # don't step anywhere, but grab info
+    _, _, _, info = env.step(0)
+    return info['ale.lives']    # return max lives
+
+
+def check_lives(life, current_life):
+    return True if life > current_life else return False
 
 
 
@@ -83,6 +92,9 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
     # total frames elapsed in an episode
     episodic_frame = 0
+    
+    # initialize lives to the maximum
+    lives = find_max_lives(env)
 
     frame_history = np.zeros([84, 84, 5], dtype=np.uint8)
 
@@ -100,15 +112,11 @@ def run(model, agent, target_agent, memory, env, mean_times):
         # iterate through a total amount of episodes
         for total_episodes_elapsed in range(hp['MAX_EPISODES']):
 
-            # when to save the model
-            if total_episodes_elapsed % hp['SAVE_MODEL'] == 0 and total_episodes_elapsed is not 0:
-                agent.save()
-
-
             # when we run out of lives or win a round
             if done:
 
                 env.reset()           # reset the game
+                lives = max_lives     # reset the number of lives we have
                 episodic_reward = 0   # reset the episodic reward
                 episodic_frame = 0    # reset the episodic frames
                 total_Q = 0           # reset the runnning total for the Q value
@@ -147,6 +155,9 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 # clip the reward between [-1, 1]
                 # may or may not affect breakout
                 #reward = np.clip(reward, -1, 1)
+                
+                # capture how many lives we now have after taking another step
+                current_lives = check_lives(lives, info['ale.lives'])
 
                 # preprocess the next frame
                 processed_next_frame = preprocess(next_frame)
@@ -158,7 +169,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 next_frame_history = frame_history[:, :, 1:]
 
                 # remember the current and next frame with their actions
-                memory.remember(current_frame_history, next_4_frame_action, reward, next_frame_history, done)
+                memory.remember(current_frame_history, next_4_frame_action, reward, next_frame_history, current_lives)
 
                 # increase the frame counter
                 total_frames_elapsed += 1
@@ -191,6 +202,10 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
             # prints our statistics
             print_stats(total_episodes_elapsed, total_frames_elapsed, hp['EPSILON'], episodic_reward, total_reward, avg_reward, avg_Q)
+            
+            # when to save the model
+            if total_episodes_elapsed % hp['SAVE_MODEL'] == 0 and total_episodes_elapsed is not 0:
+                agent.save()
 
 
 def main():

@@ -48,9 +48,9 @@ class ReplayMemory:
         self.action = [0]*memory_size 
 
         # Boolean (terminal transition?)
-        self.done = [False]*memory_size 
+        self.lost_life = [False]*memory_size 
 
-    def remember(self, current_state, action, reward, next_state, done):
+    def remember(self, current_state, action, reward, next_state, lost_life):
 
         # create an extended frame state
         frame_state = np.zeros([84, 84, 5], dtype=np.uint8)
@@ -66,7 +66,7 @@ class ReplayMemory:
 
         self.action[self.current_index] = action
         self.reward[self.current_index] = reward
-        self.done[self.current_index] = done
+        self.lost_life[self.current_index] = done
         self.current_index = (self.current_index+1)%self.maxsize
         self.size = max(self.current_index,self.size)
     

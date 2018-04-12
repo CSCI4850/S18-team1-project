@@ -35,7 +35,7 @@ class DQNAgent():
     def __init__(self, input_shape, action_space, model='Dense'):
 
         # input layer into our first dense layer
-        # with downsample: (210, 160, 3) -> (105, 80)
+        # with downsample: (210, 160, 3) -> (64, 64, 4)
         self.input_shape = input_shape
 
         # output layer mapped to an action
