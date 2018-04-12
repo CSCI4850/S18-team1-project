@@ -139,7 +139,7 @@ class DQNAgent():
             # apply exploration decay if epsilon is greater than epsilon min
             if hp['EPSILON'] > hp['EPSILON_MIN']:
                 hp['EPSILON'] *= hp['EPSILON_DECAY']
-            else
+            else:
                 hp['EPSILON'] = hp['EPSILON_MIN']
 
             return Q[0][rand], rand                  # returns action
@@ -155,7 +155,7 @@ class DQNAgent():
              # apply exploration decay if epsilon is greater than epsilon min
             if hp['EPSILON'] > hp['EPSILON_MIN']:
                 hp['EPSILON'] *= hp['EPSILON_DECAY']
-            else
+            else:
                 hp['EPSILON'] = hp['EPSILON_MIN']
 
             return Q[0][decision], decision          # returns action
