@@ -10,6 +10,9 @@ from DQNAgent import *
 from ReplayMemory import *
 from hyperparameters import *
 
+
+from collections import deque
+
 from skimage.transform import resize
 from skimage.color import rgb2gray
 from keras.preprocessing import image
@@ -26,15 +29,19 @@ def preprocess(img):
     return img.reshape(1,84,84)
 
 
-def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, episodic_reward, total_reward, avg_reward, avg_Q):
-    print('\nepisodes elapsed: {0:5d} | '    
-          'frames elapsed: {1:7d} | '      
-          'epsilon: {2:1.5f} | '             
-          'total reward: {3:3.0f}\n'        
-          'reward this episode: {4:3.0f} | ' 
-          'avg reward: {5:3.5f} | '             
-          'avg Q: {6:3.5f}\n'.format(total_episodes_elapsed, total_frames_elapsed, 
-                            epsilon, total_reward, episodic_reward ,avg_reward, avg_Q))
+def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, 
+                episodic_reward, total_reward, avg_reward, avg_Q,
+                episodic_avg_reward):
+    print('\nepisodes elapsed: {0:3d} | '    
+          'frames elapsed: {1:6d} | '      
+          'epsilon: {2:1.5f}\n'             
+          'total reward: {3:3.0f} | '        
+          'episodic reward: {4:3.0f} | ' 
+          'episodic avg reward: {7:3.2f} | '
+          'total avg reward: {5:3.3f}\n'             
+          'avg Q: {6:1.5f}\n'.format(total_episodes_elapsed, total_frames_elapsed, 
+                            epsilon, total_reward, episodic_reward ,avg_reward, avg_Q,
+                            episodic_avg_reward))
     print(line_sep)
 
 def plot_initial_graph(env):
@@ -85,7 +92,10 @@ def run(model, agent, target_agent, memory, env, mean_times):
     total_episodes_elapsed = 0
 
     # total running reward:  all rewards between all episodes
-    total_reward = 0
+    total_reward = deque()
+    
+    # total running Q:  all Q between all episodes
+    total_Q = deque()
 
     # total episodic reward: total reward for a certain episode
     episodic_reward = 0
@@ -102,9 +112,6 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
     next_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
 
-
-    total_Q = 0
-
     # change if we ever use a different model
     if model is 'Convolutional':
 
@@ -119,7 +126,6 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 lives = max_lives     # reset the number of lives we have
                 episodic_reward = 0   # reset the episodic reward
                 episodic_frame = 0    # reset the episodic frames
-                total_Q = 0           # reset the runnning total for the Q value
                 done = False          # reset the done flag
 
 
@@ -139,7 +145,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                     Q, next_4_frame_action = agent.act(Q)
 
                     # increase the total Q value
-                    total_Q += Q
+                    total_Q.append(Q)
 
 
                 # collect the next frame frames, reward, and done flag
@@ -147,14 +153,14 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 next_frame, reward, done, info = env.step(next_4_frame_action)
 
                 # have a running total
-                total_reward += reward
+                total_reward.append(reward)
 
                 # episodic reward
                 episodic_reward += reward
                 
                 # clip the reward between [-1, 1]
                 # may or may not affect breakout
-                #reward = np.clip(reward, -1, 1)
+                reward = np.clip(reward, -1, 1)
                 
                 # capture how many lives we now have after taking another step
                 current_lives = check_lives(lives, info['ale.lives'])
@@ -197,11 +203,8 @@ def run(model, agent, target_agent, memory, env, mean_times):
             mean_time = np.mean(times_window)
             mean_times.append(mean_time)
 
-            avg_reward = total_reward/total_frames_elapsed
-            avg_Q = total_Q/(total_frames_elapsed / hp['FRAME_SKIP_SIZE'])
-
             # prints our statistics
-            print_stats(total_episodes_elapsed, total_frames_elapsed, hp['EPSILON'], episodic_reward, total_reward, avg_reward, avg_Q)
+            print_stats(total_episodes_elapsed, total_frames_elapsed, hp['EPSILON'], episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_Q), episodic_reward/(total_episodes_elapsed+1))
             
             # when to save the model
             if total_episodes_elapsed % hp['SAVE_MODEL'] == 0 and total_episodes_elapsed is not 0:

@@ -57,18 +57,19 @@ hp = {
                                        # default: 0 for off
     
         'REPLAY_START' : 50000,        # when to start using replay to update the model
+                                       # default: 50000 frames
 
         'MEMORY_SIZE' : 400000,        # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 
                                        # preference for present rewards as opposed to future rewards
-                                       # default: 0.95
-
+                                       # default: 0.99
+        # 4 * 8 = 32 batch
         'REPLAY_ITERATIONS' : 4,     # how mant irerations of replay
-                                       # default: 100
+                                       # default: 4
 
         'REPLAY_SAMPLE_SIZE' : 8     # how many frames from the state memory should we use
-                                       # default: 256
+                                       # default: 8
 
 }
