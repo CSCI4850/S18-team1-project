@@ -125,9 +125,3 @@ class ReplayMemory:
             # Update the weights accordingly
             model.fit(current_state, model_targets,
                      epochs=1 ,verbose=show_fit, batch_size=sample_size)
-            
- 
-    def target_update(self, model, target_model):
-        print('Updating target model weights from model weights')
-        # target model weights <- model weights
-        target_model.set_weights(model.get_weights())

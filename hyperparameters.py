@@ -30,7 +30,7 @@ hp = {
         'SAVE_MODEL' : 201,            # how many episodes should we go through until we save the model?
                                       # default:
 
-	'TARGET_UPDATE' : 10000,      # on what mod epochs should we update the target network?
+	    'TARGET_UPDATE' : 1000,      # on what mod epochs should we update the target network?
                                       # default: 10000
 
         ###-----------------------------------###
@@ -64,7 +64,7 @@ hp = {
         'REPLAY_START' : 1000,        # when to start using replay to update the model
                                        # default: 50000 frames
 
-        'MEMORY_SIZE' : 1000000,        # size of the memory bank
+        'MEMORY_SIZE' : 200000,        # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 

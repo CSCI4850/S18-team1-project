@@ -94,8 +94,6 @@ class DQNAgent():
                                           activation = 'relu',
                                           input_shape = self.input_shape ))
 
-        #model.add(keras.layers.Flatten())
-
         # fed into a lower dimensional convolutional layer
         model.add(keras.layers.Conv2D(64, kernel_size = (4,4),
                                           strides = 2, 
@@ -194,3 +192,8 @@ class DQNAgent():
 
         print('Saving weights as: ', fn)
         self.model.save_weights(fn)
+
+    def target_update(self, Q_model):
+        print('Updating target model weights from model weights')
+        # target model weights <- model weights
+        self.model.set_weights(Q_model.get_weights())
