@@ -22,7 +22,7 @@ hp = {
                                       # defaults: 84, 84
 
         'FRAME_SKIP_SIZE' : 4,        
-	
+    
         'MAX_EPISODES' : 200,          # defined as how many cycles of full life to end life or
                                       # winning a round
                                       # default: 
@@ -30,11 +30,11 @@ hp = {
         'SAVE_MODEL' : 201,            # how many episodes should we go through until we save the model?
                                       # default:
 
-	    'TARGET_UPDATE' : 1000,      # on what mod epochs should we update the target network?
+        'TARGET_UPDATE' : 1000,      # on what mod epochs should we update the target network?
                                       # default: 10000
 
         ###-----------------------------------###
-	### hyper parameters for the DQNAgent ###
+        ### hyper parameters for the DQNAgent ###
         ###-----------------------------------###
         'WATCH_Q' : False,            # watch the Q function and see what decision it picks
                                       # cool to watch
