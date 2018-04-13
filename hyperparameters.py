@@ -24,11 +24,11 @@ hp = {
 
         'FRAME_SKIP_SIZE' : 4,        
     
-        'MAX_EPISODES' : 200,          # defined as how many cycles of full life to end life or
+        'MAX_EPISODES' : 1000,          # defined as how many cycles of full life to end life or
                                        # winning a round
                                        # default: 200
 
-        'SAVE_MODEL' : 201,            # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 1001,            # how many episodes should we go through until we save the model?
                                        # default: whenever
 
         'TARGET_UPDATE' : 10000,       # on what mod epochs should we update the target network?
@@ -44,7 +44,7 @@ hp = {
                                        # default: 0.00025
         
         'INIT_EXPLORATION' : 1.0,      # exploration rate, start at 100%
-        'EXPLORATION' : 1000000,       # decay rate for exploration on each frame
+        'EXPLORATION' : 100000,       # decay rate for exploration on each frame
         'MIN_EXPLORATION' : 0.1,
                                        # defaults: 1.0, 1,000,000, 0.1
     
@@ -58,6 +58,8 @@ hp = {
         'LOSS' : 'mse',                # can be 'logcosh' for logarithm of hyperbolic cosine
                                        # or 'mse' for mean squared error
                                        # default: logcosh
+        
+        'NO-OP_MAX' : 30,              # how many times no-op can be called.
 
         ###----------------------------------------###
         ### hyper parameters for the Replay Memory ###
@@ -65,7 +67,7 @@ hp = {
         'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
     
-        'REPLAY_START' : 1000,         # when to start using replay to update the model
+        'REPLAY_START' : 50000,         # when to start using replay to update the model
                                        # default: 50000 frames
 
         'MEMORY_SIZE' : 1000000,        # size of the memory bank

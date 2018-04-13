@@ -25,7 +25,7 @@ def normalize_frames(current_frame_history):
     return np.expand_dims(np.float64(current_frame_history / 255.), axis=0)
 
 def preprocess(img):
-    img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH']), mode='reflect') * 255)
+    img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH'])) * 255)
     return img.reshape(1,84,84)
 
 
@@ -103,6 +103,8 @@ def run(model, agent, target_agent, memory, env, mean_times):
     # total frames elapsed in an episode
     episodic_frame = 0
     
+    noop_turns = 0
+    
     e = hp['INIT_EXPLORATION']
     
     # initialize lives to the maximum
@@ -128,6 +130,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 lives = max_lives     # reset the number of lives we have
                 episodic_reward = 0   # reset the episodic reward
                 episodic_frame = 0    # reset the episodic frames
+                noop_turns = 0
                 done = False          # reset the done flag
 
 
@@ -148,7 +151,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                     Q = agent.model.predict(normalize_frames(current_frame_history))
 
                     # pick an action
-                    Q, next_4_frame_action = agent.act(Q, e)
+                    Q, next_4_frame_action = agent.act(Q, e, noop_turns)
 
                     # increase the total Q value
                     total_Q.append(Q)
@@ -266,7 +269,7 @@ def main():
     time_elapsed = end_time - start_time
 
     # print the final time elapsed
-    print('finished training in', time_elapsed, 'in seconds')
+    print('finished training in', time_elapsed, 'seconds')
 
     # save and quit
     agent.quit(mean_times)

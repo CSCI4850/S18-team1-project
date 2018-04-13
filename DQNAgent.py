@@ -50,8 +50,6 @@ class DQNAgent():
             # build the convolutional model
             self.model = self.build_convolutional_model()
 
-        #self.model.load_weights('pong_weights-18-01-28-16-18.h5')
-
     # build the model
     # Input:  none
     # Output: Returns the built and compiled model
@@ -120,8 +118,7 @@ class DQNAgent():
         optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
                                           epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'Adam'
                     else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
-                                                  epsilon=hp['MIN_SQUARED_GRADIENT'],
-                                                  rho=hp['MOMENTUM']) if hp['OPTIMIZER'] is 'RMSProp'
+                                                  epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
                     
                     else keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
                                           epsilon=hp['MIN_SQUARED_GRADIENT']), 
@@ -136,26 +133,30 @@ class DQNAgent():
     # acts upon the game given a state
     # Input:  state of the game
     # Output: returns the action taken
-    def act(self, Q, e):
+    def act(self, Q, e, noop_turns):
 
         # with some probability from our epsilon annealing,
         if np.random.rand() <= e:
             # select a random action
             rand = random.randrange(self.action_space)
-
+            action = find_action(rand)
+            
+            # implements no-op max of 30?
+            if action == 'no-op':
+                noop_turns += 1
+                if noop_turns < hp['NO-OP_MAX']:
+                    rand = random.randrange(1, self.action_space)
+                
             # print q and decision
             if hp['WATCH_Q']:
                 print ('Random Action! Q:', Q, 'decision:', find_action(rand))
             
-            # implements no-op max of 30?
-            #if no-op_turns < hp['NO-OP_MAX']:
-                
             return Q[0][rand], rand                  # returns action
 
         # otherwise,
         else:
             decision = np.argmax(Q)
-
+            
             # print q and decision
             if hp['WATCH_Q']:
                 print ('Q:', Q, 'decision:', find_action(decision))
