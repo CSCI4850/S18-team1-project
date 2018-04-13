@@ -46,7 +46,7 @@ hp = {
         'INIT_EXPLORATION' : 1.0,      # exploration rate, start at 100%
         'EXPLORATION' : 1000000,       # decay rate for exploration on each frame
         'MIN_EXPLORATION' : 0.1,
-                                       # defaults: 1.0, 0.999, 0.01
+                                       # defaults: 1.0, 1,000,000, 0.1
     
         'OPTIMIZER' : 'RMSprop',       # optimizer used
                                        # default: RMSprop or Adam
@@ -68,17 +68,17 @@ hp = {
         'REPLAY_START' : 1000,         # when to start using replay to update the model
                                        # default: 50000 frames
 
-        'MEMORY_SIZE' : 200000,        # size of the memory bank
+        'MEMORY_SIZE' : 1000000,        # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 
                                        # preference for present rewards as opposed to future rewards
                                        # default: 0.99
         # 4 * 8 = 32 batch
-        'REPLAY_ITERATIONS' : 4,       # how mant irerations of replay
+        'REPLAY_ITERATIONS' : 1,       # how many irerations of replay
                                        # default: 4
 
-        'REPLAY_SAMPLE_SIZE' : 8       # how many frames from the state memory should we use
+        'REPLAY_SAMPLE_SIZE' : 32       # how many frames from the state memory should we use
                                        # default: 8
 
 }

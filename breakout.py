@@ -139,7 +139,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
             while not done:
                 
                 # e-greedy
-                if e > hp['MIN_EXPLORATION'] and total_frames_elapsed > hp['REPLAY_START']:
+                if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
                     e -= (hp['INIT_EXPLORATION'] - hp['MIN_EXPLORATION']) / hp['EXPLORATION']
 
                 # determine an action every 4 frames

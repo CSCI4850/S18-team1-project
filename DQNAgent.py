@@ -114,7 +114,7 @@ class DQNAgent():
 
         # try mse, mean squared error or logcosh, log of hyperbolic cosine
         model.compile(loss = keras.losses.logcosh if hp['LOSS'] is 'logcosh'
-                        else keras.lossses.mse    if hp['LOSS'] is 'mse'
+                        else keras.losses.mse    if hp['LOSS'] is 'mse'
                         else keras.losses.logcosh,
                       
         optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
@@ -122,7 +122,8 @@ class DQNAgent():
                     else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
                                                   epsilon=hp['MIN_SQUARED_GRADIENT'],
                                                   rho=hp['MOMENTUM']) if hp['OPTIMIZER'] is 'RMSProp'
-                      else keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
+                    
+                    else keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
                                           epsilon=hp['MIN_SQUARED_GRADIENT']), 
         metrics = ['accuracy'])
 
@@ -145,7 +146,10 @@ class DQNAgent():
             # print q and decision
             if hp['WATCH_Q']:
                 print ('Random Action! Q:', Q, 'decision:', find_action(rand))
-
+            
+            # implements no-op max of 30?
+            #if no-op_turns < hp['NO-OP_MAX']:
+                
             return Q[0][rand], rand                  # returns action
 
         # otherwise,
@@ -195,6 +199,6 @@ class DQNAgent():
         self.model.save_weights(fn)
 
     def target_update(self, Q_model):
-        print('Updating target model weights from model weights')
+        print('Updating target model weights from model weights..')
         # target model weights <- model weights
         self.model.set_weights(Q_model.get_weights())
