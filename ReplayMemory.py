@@ -9,7 +9,7 @@ from hyperparameters import *
 def normalize_states(current_frame_history):
     # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
     # normalize 0-255 -> 0-1 to reduce exploding gradient
-    return current_frame_history.astype(np.float32) / 255.
+    return np.float64(current_frame_history / 255.)
 
 class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
@@ -39,10 +39,10 @@ class ReplayMemory:
         self.current_index = 0
 
         # create the current state of the game (1,000,000, 64)
-        self.states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth])
+        self.states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
 
         # reward array (1,000,000)
-        self.reward = np.zeros([memory_size])
+        self.reward = np.zeros([memory_size], dtype=np.uint8)
 
         # integer action
         self.action = [0]*memory_size 
