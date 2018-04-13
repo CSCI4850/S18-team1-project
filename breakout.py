@@ -187,7 +187,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                     # when to learn and replay to update the model
                     if total_frames_elapsed % hp['TARGET_UPDATE'] == 0:
                         # update the target model
-                        memory.target_udpate(agent.model, target_agent.model)
+                        memory.target_update(agent.model, target_agent.model)
 
                 if hp['RENDER_ENV'] is True:
                     env.render()        # renders each frame
