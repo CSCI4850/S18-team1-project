@@ -120,7 +120,8 @@ class DQNAgent():
         optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
                                           epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'Adam'
                     else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
-                                                  epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
+                                                  epsilon=hp['MIN_SQUARED_GRADIENT'],
+                                                  rho=hp['MOMENTUM']) if hp['OPTIMIZER'] is 'RMSProp'
                       else keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
                                           epsilon=hp['MIN_SQUARED_GRADIENT']), 
         metrics = ['accuracy'])
