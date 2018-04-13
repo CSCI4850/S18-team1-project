@@ -7,6 +7,9 @@ hp = {
         ###-----------------------------------------###
         ### hyper parameters for the Main Game Loop ###
         ###-----------------------------------------###
+    
+        'GAME' : 'BreakoutDeterministic-v4',
+    
         'LOAD_WEIGHTS' : '',          # Loads weights into the model if so desired
                                       # leave '' if starting from a new model
 
@@ -39,12 +42,14 @@ hp = {
         'LEARNING_RATE' : 0.00025,      # learning rate of the Adam optimizer
                                       # default: 0.00025
         
-        'EPSILON' : 1.0,              # exploration rate, start at 100%
-        'EPSILON_DECAY' : 0.999,      # decay rate for exploration on each frame
-        'EPSILON_MIN' : 0.01,         # minimum exploration rate
+        'INIT_EXPLORATION' : 1.0,              # exploration rate, start at 100%
+        'EXPLORATION' : 1000000,    # decay rate for exploration on each frame
+        'MIN_EXPLORATION' : 0.1,
                                       # defaults: 1.0, 0.999, 0.01
     
         'OPTIMIZER' : 'Adam',          # optimizer used
+        'MIN_SQUARED_GRADIENT' : 0.01, # minimum exploration rate
+        'MOMENTUM' : 0.95,
 
         'LOSS' : 'logcosh',           # can be 'logcosh' for logarithm of hyperbolic cosine
                                       # or 'mse' for mean squared error
@@ -56,10 +61,10 @@ hp = {
         'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
     
-        'REPLAY_START' : 50000,        # when to start using replay to update the model
+        'REPLAY_START' : 1000,        # when to start using replay to update the model
                                        # default: 50000 frames
 
-        'MEMORY_SIZE' : 400000,        # size of the memory bank
+        'MEMORY_SIZE' : 1000000,        # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 

@@ -118,9 +118,13 @@ class DQNAgent():
         model.compile(loss = keras.losses.logcosh if hp['LOSS'] is 'logcosh'
                         else keras.lossses.mse    if hp['LOSS'] is 'mse'
                         else keras.losses.logcosh,
-        optimizer = keras.optimizers.Adam(lr = hp['LEARNING_RATE']) if hp['OPTIMIZER'] is 'Adam'
-               else keras.optimizers.RMSprop(lr = hp['LEARNING_RATE']) if hp['OPTIMIZER'] is 'RMSProp'
-               else keras.optimizers.Adam(lr = hp['LEARNING_RATE']), 
+                      
+        optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
+                                          epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'Adam'
+                    else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
+                                                  epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
+                      else keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
+                                          epsilon=hp['MIN_SQUARED_GRADIENT']), 
         metrics = ['accuracy'])
 
         # show summary
@@ -132,22 +136,16 @@ class DQNAgent():
     # acts upon the game given a state
     # Input:  state of the game
     # Output: returns the action taken
-    def act(self, Q):
+    def act(self, Q, e):
 
         # with some probability from our epsilon annealing,
-        if np.random.rand() <= hp['EPSILON']:
+        if np.random.rand() <= e:
             # select a random action
             rand = random.randrange(self.action_space)
 
             # print q and decision
             if hp['WATCH_Q']:
                 print ('Random Action! Q:', Q, 'decision:', find_action(rand))
-
-            # apply exploration decay if epsilon is greater than epsilon min
-            if hp['EPSILON'] > hp['EPSILON_MIN']:
-                hp['EPSILON'] *= hp['EPSILON_DECAY']
-            else:
-                hp['EPSILON'] = hp['EPSILON_MIN']
 
             return Q[0][rand], rand                  # returns action
 
@@ -158,12 +156,6 @@ class DQNAgent():
             # print q and decision
             if hp['WATCH_Q']:
                 print ('Q:', Q, 'decision:', find_action(decision))
-
-             # apply exploration decay if epsilon is greater than epsilon min
-            if hp['EPSILON'] > hp['EPSILON_MIN']:
-                hp['EPSILON'] *= hp['EPSILON_DECAY']
-            else:
-                hp['EPSILON'] = hp['EPSILON_MIN']
 
             return Q[0][decision], decision          # returns action
 

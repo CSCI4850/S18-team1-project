@@ -22,7 +22,7 @@ line_sep = '+-------------------------------------------------------------------
 def normalize_frames(current_frame_history):
     # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
     # normalize 0-255 -> 0-1 to reduce exploding gradient
-    return np.expand_dims(current_frame_history.astype(np.float32) / 255., axis=0)
+    return np.expand_dims(np.float64(current_frame_history / 255.), axis=0)
 
 def preprocess(img):
     img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH']), mode='reflect') * 255)
@@ -103,6 +103,8 @@ def run(model, agent, target_agent, memory, env, mean_times):
     # total frames elapsed in an episode
     episodic_frame = 0
     
+    e = hp['INIT_EXPLORATION']
+    
     # initialize lives to the maximum
     lives = max_lives = find_max_lives(env)
 
@@ -135,6 +137,10 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
             # while the episode is not done,
             while not done:
+                
+                # e-greedy
+                if e > hp['MIN_EXPLORATION'] and total_frames_elapsed > hp['REPLAY_START']:
+                    e -= (hp['INIT_EXPLORATION'] - hp['MIN_EXPLORATION']) / hp['EXPLORATION']
 
                 # determine an action every 4 frames
                 if episodic_frame % hp['FRAME_SKIP_SIZE'] == 0:
@@ -142,7 +148,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                     Q = agent.model.predict(normalize_frames(current_frame_history))
 
                     # pick an action
-                    Q, next_4_frame_action = agent.act(Q)
+                    Q, next_4_frame_action = agent.act(Q, e)
 
                     # increase the total Q value
                     total_Q.append(Q)
@@ -204,7 +210,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
             mean_times.append(mean_time)
 
             # prints our statistics
-            print_stats(total_episodes_elapsed, total_frames_elapsed, hp['EPSILON'], episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_Q), episodic_reward/(total_episodes_elapsed+1))
+            print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_Q), episodic_reward/(total_episodes_elapsed+1))
             
             # when to save the model
             if total_episodes_elapsed % hp['SAVE_MODEL'] == 0 and total_episodes_elapsed is not 0:
@@ -219,7 +225,7 @@ def main():
     model = 'Convolutional'
 
     # pixel/frame data
-    env = gym.make("Breakout-v4")
+    env = gym.make(hp['GAME'])
 
     # 4 actions
     # 0: no-op 1: fire 2: right 3: left
