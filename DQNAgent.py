@@ -17,6 +17,7 @@ import sys
 import pickle
 import datetime
 
+# returns the actual action name
 def find_action(action):
     # actions:
     # 0: no-op 1: fire 2: right 3: left
@@ -133,19 +134,12 @@ class DQNAgent():
     # acts upon the game given a state
     # Input:  state of the game
     # Output: returns the action taken
-    def act(self, Q, e, noop_turns):
+    def act(self, Q, e):
 
         # with some probability from our epsilon annealing,
         if np.random.rand() <= e:
             # select a random action
             rand = random.randrange(self.action_space)
-            action = find_action(rand)
-            
-            # implements no-op max of 30?
-            if action == 'no-op':
-                noop_turns += 1
-                if noop_turns < hp['NO-OP_MAX']:
-                    rand = random.randrange(1, self.action_space)
                 
             # print q and decision
             if hp['WATCH_Q']:
@@ -166,15 +160,19 @@ class DQNAgent():
     # hard exits the game
     # Input: None
     # Ouput: None, but saves and exits the game
-    def quit(self, mean_times):
+    def quit(self, mean_times, stats):
 
         # save the model
         self.save()
+        
+        time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
 
         print('Saving stats..')
         # saving stats
-        with open('stats/mean_times.data', 'wb') as f:
+        with open('stats/' + time + 'mean_times.data', 'wb') as f:
             pickle.dump(mean_times, f)
+        with open('stats/' + time + 'stats.data', 'wb') as f:
+            pickle.dump(stats, f)
 
         # exit
         print('Exiting..')
@@ -199,6 +197,9 @@ class DQNAgent():
         print('Saving weights as: ', fn)
         self.model.save_weights(fn)
 
+    # updates the target model
+    # Input:  Q model
+    # Output: None, updates target model weights
     def target_update(self, Q_model):
         print('Updating target model weights from model weights..')
         # target model weights <- model weights

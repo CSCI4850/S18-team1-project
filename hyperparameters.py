@@ -22,13 +22,15 @@ hp = {
         'WIDTH'  : 84,                 # and width in pixels that the game window will get downscaled to
                                        # defaults: 84, 84
 
-        'FRAME_SKIP_SIZE' : 4,        
+        'FRAME_SKIP_SIZE' : 4,         # how many frames we skip and and how many times we choose an action for
+                                       # that many frames.
+                                       # default: 4
     
-        'MAX_EPISODES' : 1000,          # defined as how many cycles of full life to end life or
+        'MAX_EPISODES' : 5000,         # defined as how many cycles of full life to end life or
                                        # winning a round
-                                       # default: 200
+                                       # default: 2000
 
-        'SAVE_MODEL' : 1001,            # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 1000,           # how many episodes should we go through until we save the model?
                                        # default: whenever
 
         'TARGET_UPDATE' : 10000,       # on what mod epochs should we update the target network?
@@ -39,27 +41,30 @@ hp = {
         ###-----------------------------------###
         'WATCH_Q' : False,             # watch the Q function and see what decision it picks
                                        # cool to watch
+                                       # default: False
 
         'LEARNING_RATE' : 0.00025,     # learning rate of the Adam optimizer
                                        # default: 0.00025
         
         'INIT_EXPLORATION' : 1.0,      # exploration rate, start at 100%
-        'EXPLORATION' : 100000,       # decay rate for exploration on each frame
-        'MIN_EXPLORATION' : 0.1,
+        'EXPLORATION' : 1000000,       # how many frames we decay till
+        'MIN_EXPLORATION' : 0.1,       # ending exploration rate
                                        # defaults: 1.0, 1,000,000, 0.1
     
         'OPTIMIZER' : 'RMSprop',       # optimizer used
                                        # default: RMSprop or Adam
+    
         'MIN_SQUARED_GRADIENT' : 0.01, # epsilon rate
                                        # default: 0.01
-        'MOMENTUM' : 0.95,             # momentum of the optimizer
-                                       # default: 0.95
 
         'LOSS' : 'mse',                # can be 'logcosh' for logarithm of hyperbolic cosine
                                        # or 'mse' for mean squared error
-                                       # default: logcosh
+                                       # default: logcosh or mse
         
-        'NO-OP_MAX' : 30,              # how many times no-op can be called.
+        'NO-OP_MAX' : 30,              # how many times no-op can be called in a single episode
+                                       # chooses a different action if exceeded
+                                       # default: 30
+                                    
 
         ###----------------------------------------###
         ### hyper parameters for the Replay Memory ###
@@ -67,10 +72,10 @@ hp = {
         'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
     
-        'REPLAY_START' : 50000,         # when to start using replay to update the model
+        'REPLAY_START' : 10,        # when to start using replay to update the model
                                        # default: 50000 frames
 
-        'MEMORY_SIZE' : 1000000,        # size of the memory bank
+        'MEMORY_SIZE' : 10,       # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 
@@ -80,7 +85,7 @@ hp = {
         'REPLAY_ITERATIONS' : 1,       # how many irerations of replay
                                        # default: 4
 
-        'REPLAY_SAMPLE_SIZE' : 32       # how many frames from the state memory should we use
+        'REPLAY_SAMPLE_SIZE' : 1       # batch size used to learn
                                        # default: 8
 
 }

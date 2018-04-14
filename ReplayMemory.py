@@ -6,9 +6,9 @@ import numpy as np
 
 from hyperparameters import *
 
+# expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
+# normalize 0-255 -> 0-1 to reduce exploding gradient
 def normalize_states(current_frame_history):
-    # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
-    # normalize 0-255 -> 0-1 to reduce exploding gradient
     return np.float64(current_frame_history / 255.)
 
 class ReplayMemory:
@@ -38,7 +38,7 @@ class ReplayMemory:
         # default current index
         self.current_index = 0
 
-        # create the current state of the game (1,000,000, 64)
+        # create the current state of the game (1,000,000, 64, 64, 4)
         self.states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
 
         # reward array (1,000,000)
@@ -63,11 +63,16 @@ class ReplayMemory:
 
         # Stores a single memory item
         self.states[self.current_index,:] = frame_state
-
+        
+        # get the rest of the items
         self.action[self.current_index] = action
         self.reward[self.current_index] = reward
         self.lost_life[self.current_index] = lost_life
+        
+        # offset the current index
         self.current_index = (self.current_index+1)%self.maxsize
+        
+        # increase the size
         self.size = max(self.current_index,self.size)
     
     def replay(self, model, target_model):
@@ -88,7 +93,8 @@ class ReplayMemory:
         # Can't train if we don't yet have enough samples to begin with...
         if self.size < sample_size:
             return
-            
+        
+        # number of replays
         for i in range(num_samples):
                             
             # Select sample_size memory indices from the whole set
@@ -103,17 +109,19 @@ class ReplayMemory:
             # and normalize states [0,1] instead of 0-255
             next_state = normalize_states(self.states[current_sample, :, :, 1:5])
 
-
+            # get the rest of the items from memory
             action = [self.action[j] for j in current_sample]
             reward = self.reward[current_sample]
             lost_life = [self.lost_life[j] for j in current_sample]
+            
+            lost_life_batch = np.array(lost_life) + 0
             
             # Obtain model's current Q-values
             model_targets = model.predict(current_state)
             
             # Create targets from argmax(Q(s+1,a+1))
             # Use the target model!
-            targets = reward + gamma * np.amax(target_model.predict(next_state),axis=1)
+            targets = reward + (1 - lost_life_batch) * gamma * np.amax(target_model.predict(next_state),axis=1)
             # Absorb the reward on terminal state-action transitions
             targets[lost_life] = reward[lost_life]
             # Update just the relevant parts of the model_target vector...

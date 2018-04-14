@@ -17,18 +17,24 @@ from skimage.transform import resize
 from skimage.color import rgb2gray
 from keras.preprocessing import image
 
+# used for pretty printing
 line_sep = '+----------------------------------------------------------------------------------------+'
 
+# expand dimensions to (1, 84, 84, 4) from (84, 84, 4)
+# normalize 0-255 -> 0-1 to reduce exploding gradient
 def normalize_frames(current_frame_history):
-    # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
-    # normalize 0-255 -> 0-1 to reduce exploding gradient
     return np.expand_dims(np.float64(current_frame_history / 255.), axis=0)
 
+# reduces the rgb channels to black and white (3 axis to 2 axis),
+# then resizes the (210, 160) to (height, width) default: 84, 84
+# then reduces the np array to 0-255 ints for saving space
+# finally expands the axis 0 dimension by one for saving into the conv net
 def preprocess(img):
-    img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH'])) * 255)
-    return img.reshape(1,84,84)
+    img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH']), mode='reflect') * 255)
+    return img
+    #return img.reshape(1,84,84)
 
-
+# prints statistics at the end of every episode
 def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, 
                 episodic_reward, total_reward, avg_reward, avg_Q,
                 episodic_avg_reward):
@@ -44,29 +50,33 @@ def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon,
                             episodic_avg_reward))
     print(line_sep)
 
+# plots a graph of the game
 def plot_initial_graph(env):
     plt.imshow(env.render(mode='rgb_array'))
     plt.title("%s" % (env.spec.id))
     clear_output(wait=True)
     display(plt.gcf())
 
-
+# initializes the beginning of an episode by loading the first frame
+# however big the frame skip size is default: 4
+# into a historical frame buffer
 def init_frame_skip(past_frames_size, frame):
     for i in range(hp['FRAME_SKIP_SIZE']):
         past_frames_size[:, :, i] = preprocess(frame)
-        
+
+# returns the max number of lives in the game being played
 def find_max_lives(env):
     # don't step anywhere, but grab info
     _, _, _, info = env.step(0)
     return info['ale.lives']    # return max lives
 
-
+# checks whether we have lost a life
+# used to send that into done rather than waiting until and episode is done
 def check_lives(life, current_life):
     return ( True if life > current_life else False )
 
-
-
-def run(model, agent, target_agent, memory, env, mean_times):
+# main loop, runs everything
+def run(model, agent, target_agent, memory, env, mean_times, stats):
 
     # Peformance stats
     times_window = deque(maxlen=100)
@@ -96,25 +106,25 @@ def run(model, agent, target_agent, memory, env, mean_times):
     
     # total running Q:  all Q between all episodes
     total_Q = deque()
-
-    # total episodic reward: total reward for a certain episode
-    episodic_reward = 0
-
-    # total frames elapsed in an episode
-    episodic_frame = 0
     
-    noop_turns = 0
-    
+    # initialize a greedy-e default: 1.0
     e = hp['INIT_EXPLORATION']
     
-    # initialize lives to the maximum
-    lives = max_lives = find_max_lives(env)
-
+    # initialize max lives to the maximum
+    max_lives = find_max_lives(env)
+    
+    # overlapping frame history buffer used to store past frames
+    # of size frame FRAME_SKIP_SIZE + 1
     frame_history = np.zeros([84, 84, 5], dtype=np.uint8)
-
+    
+    # current frame history of size 4
     current_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
-
+    
+    # next set of frame history of size 4
     next_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
+    
+    # amount of exploration to decrease each frame
+    e_step = (hp['INIT_EXPLORATION'] - hp['MIN_EXPLORATION']) / hp['EXPLORATION']
 
     # change if we ever use a different model
     if model is 'Convolutional':
@@ -123,27 +133,28 @@ def run(model, agent, target_agent, memory, env, mean_times):
         # iterate through a total amount of episodes
         for total_episodes_elapsed in range(hp['MAX_EPISODES']):
 
-            # when we run out of lives or win a round
-            if done:
 
-                env.reset()           # reset the game
-                lives = max_lives     # reset the number of lives we have
-                episodic_reward = 0   # reset the episodic reward
-                episodic_frame = 0    # reset the episodic frames
-                noop_turns = 0
-                done = False          # reset the done flag
-
-
+            current_frame = env.reset()     # reset the game
+            lives = max_lives     # reset the number of lives we have
+            episodic_reward = 0   # reset the episodic reward
+            episodic_frame = 0    # reset the episodic frames
+            done = False          # reset the done flag
+            
+            # do nothing for some amount of the initial game
+            for _ in range(random.randint(1, hp['NO-OP_MAX'])):
+                current_frame, _, _, _ = env.step(0) # do nothing
+            
+            # set up the current and next frame with the first frame of the game
             init_frame_skip(current_frame_history, current_frame)
             init_frame_skip(next_frame_history, current_frame)
-
 
             # while the episode is not done,
             while not done:
                 
-                # e-greedy
+                # e-greedy scaled linearly over time
+                # starts at 1.0 ends at 0.1
                 if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
-                    e -= (hp['INIT_EXPLORATION'] - hp['MIN_EXPLORATION']) / hp['EXPLORATION']
+                    e -= e_step
 
                 # determine an action every 4 frames
                 if episodic_frame % hp['FRAME_SKIP_SIZE'] == 0:
@@ -151,7 +162,7 @@ def run(model, agent, target_agent, memory, env, mean_times):
                     Q = agent.model.predict(normalize_frames(current_frame_history))
 
                     # pick an action
-                    Q, next_4_frame_action = agent.act(Q, e, noop_turns)
+                    Q, next_4_frame_action = agent.act(Q, e)
 
                     # increase the total Q value
                     total_Q.append(Q)
@@ -169,14 +180,16 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 
                 # clip the reward between [-1, 1]
                 # may or may not affect breakout
-                reward = np.clip(reward, -1, 1)
+                clipped_reward = np.clip(reward, -1, 1)
                 
                 # capture how many lives we now have after taking another step
+                # used in place of done in remmeber because an episode is technically
+                # only as long as the agent is alive, speeds up training
                 current_lives = check_lives(lives, info['ale.lives'])
 
                 # preprocess the next frame
                 processed_next_frame = preprocess(next_frame)
-
+                
                 # add the next frame, 4th item is new frame
                 frame_history[:, :, 4] = processed_next_frame
 
@@ -184,7 +197,8 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 next_frame_history = frame_history[:, :, 1:]
 
                 # remember the current and next frame with their actions
-                memory.remember(current_frame_history, next_4_frame_action, reward, next_frame_history, current_lives)
+                memory.remember(current_frame_history, next_4_frame_action, 
+                                clipped_reward, next_frame_history, current_lives)
 
                 # increase the frame counter
                 total_frames_elapsed += 1
@@ -195,17 +209,19 @@ def run(model, agent, target_agent, memory, env, mean_times):
                 # update frame history
                 # [0, 1, 2, 3] <- [1, 2, 3, 4]
                 frame_history[:, :, :4] = frame_history[:, :, 1:]
-    
+                
+                
+                # if we have begun training
                 if total_frames_elapsed > hp['REPLAY_START']:
                     memory.replay(agent.model, target_agent.model)
         
-                    # when to learn and replay to update the model
+                    # target model weights <- model weights
                     if total_frames_elapsed % hp['TARGET_UPDATE'] == 0:
-                        # update the target model
                         target_agent.target_update(agent.model)
-
+                
+                # renders each frame
                 if hp['RENDER_ENV'] is True:
-                    env.render()        # renders each frame
+                    env.render()        
 
             # record
             times_window.append(episodic_frame)
@@ -214,6 +230,10 @@ def run(model, agent, target_agent, memory, env, mean_times):
 
             # prints our statistics
             print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_Q), episodic_reward/(total_episodes_elapsed+1))
+            
+            episode_stats = [total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_Q), episodic_reward/(total_episodes_elapsed+1)]
+            stats.append(episode_stats)
+
             
             # when to save the model
             if total_episodes_elapsed % hp['SAVE_MODEL'] == 0 and total_episodes_elapsed is not 0:
@@ -246,10 +266,12 @@ def main():
 
     # performance
     mean_times = deque(maxlen=hp['MAX_EPISODES'])
+    stats = []
 
     # create a DQN Agent
     agent = DQNAgent(new_input_space, action_space, model)
-
+    
+    # to load weights
     if (hp['LOAD_WEIGHTS']):
         agent.load(hp['LOAD_WEIGHTS'])
 
@@ -260,7 +282,7 @@ def main():
     memory = ReplayMemory(hp['MEMORY_SIZE'], new_input_space, action_space)
 
     # run the main loop of the game
-    run(model, agent, target_agent, memory, env, mean_times)
+    run(model, agent, target_agent, memory, env, mean_times, stats)
 
     # end time of the program
     end_time = time.time()
@@ -272,7 +294,7 @@ def main():
     print('finished training in', time_elapsed, 'seconds')
 
     # save and quit
-    agent.quit(mean_times)
+    agent.quit(mean_times, stats)
 
 
 # execute main
