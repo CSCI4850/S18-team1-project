@@ -72,20 +72,20 @@ hp = {
         'SHOW_FIT' : 0,                # shows the fit of the model and it's work, turn to 0 for off
                                        # default: 0 for off
     
-        'REPLAY_START' : 10,        # when to start using replay to update the model
+        'REPLAY_START' : 50000,        # when to start using replay to update the model
                                        # default: 50000 frames
 
-        'MEMORY_SIZE' : 10,       # size of the memory bank
+        'MEMORY_SIZE' : 1000000,       # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 
                                        # preference for present rewards as opposed to future rewards
                                        # default: 0.99
         # 4 * 8 = 32 batch
-        'REPLAY_ITERATIONS' : 1,       # how many irerations of replay
+        'REPLAY_ITERATIONS' : 4,       # how many irerations of replay
                                        # default: 4
 
-        'REPLAY_SAMPLE_SIZE' : 1       # batch size used to learn
+        'REPLAY_SAMPLE_SIZE' : 8       # batch size used to learn
                                        # default: 8
 
 }
