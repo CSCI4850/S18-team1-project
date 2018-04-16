@@ -74,7 +74,7 @@ class ReplayMemory:
         num_samples = hp['REPLAY_ITERATIONS']
 
         # set the sample size out of the memory bank 
-        sample_size = hp['BATCH_SIZEw']
+        sample_size = hp['BATCH_SIZE']
 
         # discount rate
         gamma = hp['GAMMA']
@@ -95,15 +95,15 @@ class ReplayMemory:
             # Slice memory into training sample
             # current state is frames [0, 1, 2, 3]
             # and normalize states [0,1] instead of 0-255
-            current_states = normalize_states(self.states[current_sample, :, :, :])
+            current_states = normalize_states(self.current_states[current_sample, :, :, :])
 
             # next_state is frames [1, 2, 3, 4]
             # and normalize states [0,1] instead of 0-255
-            next_states = normalize_states(self.states[current_sample, :, :, :])
+            next_states = normalize_states(self.next_states[current_sample, :, :, :])
 
             # get the rest of the items from memory
             actions = [self.action[j] for j in current_sample]
-            rewards = self.reward[current_sample]
+            reward = self.reward[current_sample]
             lost_lives = [self.lost_life[j] for j in current_sample]
                         
             # Obtain model's current Q-values
