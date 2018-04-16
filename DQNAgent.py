@@ -21,14 +21,14 @@ import datetime
 def find_action(action):
     # actions:
     # 0: no-op 1: fire 2: right 3: left
-    # ->
-    # 0: fire (no-op) 1: right 2: left
     action = int(action)
     if action is 0:
         return 'no-op'
     elif action is 1:
+        return 'fire'
+    elif action is 2:
         return 'move right'
-    elif action is 1:
+    elif action is 3:
         return 'move left'
 
 # DQNAgent for breakout
@@ -40,9 +40,7 @@ class DQNAgent():
         self.input_shape = input_shape
 
         # output layer mapped to an action
-        # since no-op and fire both are essentially no-op,
-        # reduce action space by 1
-        self.action_space = action_space-1
+        self.action_space = action_space
 
 
         if model is 'Dense':
@@ -121,8 +119,7 @@ class DQNAgent():
                     else keras.losses.logcosh,
                       
         optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
-                                          epsilon=hp['MIN_SQUARED_GRADIENT'],
-                                          beta_1=hp['GRADIENT_MOMENTUM']) if hp['OPTIMIZER'] is 'Adam'
+                                          epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'Adam'
                     else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
                                                   epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
                     
@@ -168,10 +165,16 @@ class DQNAgent():
     def quit(self, mean_times, stats):
 
         # save the model
-        self.save()
-        
-        time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
+        self.save_weights()
+        self.save_stats(mean_times, stats)
 
+        # exit
+        print('Exiting..')
+        sys.exit()
+        
+        
+    def save_stats(self, mean_times, stats):
+        time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
         print('Saving stats..')
         # saving stats
         with open('stats/' + time + 'mean_times.data', 'wb') as f:
@@ -179,14 +182,10 @@ class DQNAgent():
         with open('stats/' + time + 'stats.data', 'wb') as f:
             pickle.dump(stats, f)
 
-        # exit
-        print('Exiting..')
-        sys.exit()
-
     # load the weights for the game from previous runs
     # Input: filename input
     # Output: None
-    def load(self, name):
+    def load_weights(self, name):
         name = 'weights/' + name
         print('Loading weights from: ', name)
         self.model.load_weights(name)
@@ -194,7 +193,7 @@ class DQNAgent():
     # saves the weights into a folder in ./weights/
     # Input:  filename
     # Output: None, saves the file into a folder
-    def save(self):
+    def save_weights(self):
         # set the file name
         fn = 'weights/breakout-v4-weights-' + \
         str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'

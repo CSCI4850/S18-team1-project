@@ -237,8 +237,9 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
             print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, total_reward, avg_reward_per_episode, np.mean(total_max_Q))
             
             # when to save the model
-            if total_episodes_elapsed+1 % hp['SAVE_MODEL'] == 0:
-                agent.save()
+            if (total_episodes_elapsed+1) % hp['SAVE_MODEL'] == 0:
+                agent.save_weights()
+                agent.save_stats(mean_times, stats)
 
 
 def main():
@@ -274,7 +275,7 @@ def main():
     
     # to load weights
     if (hp['LOAD_WEIGHTS']):
-        agent.load(hp['LOAD_WEIGHTS'])
+        agent.load_weights(hp['LOAD_WEIGHTS'])
 
     # and a target DQN Agent
     target_agent = DQNAgent(new_input_space, action_space, model)

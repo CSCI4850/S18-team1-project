@@ -30,7 +30,7 @@ hp = {
                                        # winning a round
                                        # default: 2000
 
-        'SAVE_MODEL' : 2000,           # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 2,           # how many episodes should we go through until we save the model?
                                        # default: whenever
 
         'TARGET_UPDATE' : 10000,       # on what mod epochs should we update the target network?
@@ -78,7 +78,7 @@ hp = {
         'REPLAY_START' : 50000,        # when to start using replay to update the model
                                        # default: 50000 frames
 
-        'MEMORY_SIZE' : 700000,       # size of the memory bank
+        'MEMORY_SIZE' : 1000000,       # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 
