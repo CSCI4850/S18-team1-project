@@ -196,7 +196,7 @@ class DQNAgent():
     # Output: None, saves the file into a folder
     def save(self):
         # set the file name
-        fn = 'weights/breakout-v4-weights-' + \
+        fn = 'weights/breakout-v4-weights-D-' + \
         str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
 
         print('Saving weights as: ', fn)
