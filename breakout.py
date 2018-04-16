@@ -21,7 +21,8 @@ from keras.preprocessing import image
 line_sep = '+----------------------------------------------------------------------------------------+'
 
 # expand dimensions to (1, 84, 84, 4) from (84, 84, 4)
-# normalize 0-255 -> 0-1 to reduce exploding gradient
+# use array[0:1,:,:,:]
+# normalize 0-255 -> 0.0-1.0 to reduce exploding gradient
 def normalize_frames(current_frame_history):
     return np.expand_dims(np.float64(current_frame_history / 255.), axis=0)
 
@@ -105,7 +106,7 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
     total_reward = deque()
     
     # total running Q:  all Q between all episodes
-    total_Q = deque()
+    total_max_Q = deque()
     
     # initialize a greedy-e default: 1.0
     e = hp['INIT_EXPLORATION']
@@ -162,10 +163,10 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
                     Q = agent.model.predict(normalize_frames(current_frame_history))
 
                     # pick an action
-                    Q, next_4_frame_action = agent.act(Q, e)
+                    max_Q, next_4_frame_action = agent.act(Q, e)
 
                     # increase the total Q value
-                    total_Q.append(Q)
+                    total_max_Q.append(max_Q)
 
 
                 # collect the next frame frames, reward, and done flag
@@ -223,20 +224,18 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
                 if hp['RENDER_ENV'] is True:
                     env.render()        
 
-            # record
+            # record stats
             times_window.append(episodic_frame)
             mean_time = np.mean(times_window)
             mean_times.append(mean_time)
-
-            # prints our statistics
-            print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_Q), episodic_reward/(total_episodes_elapsed+1))
-            
-            episode_stats = [total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_Q), episodic_reward/(total_episodes_elapsed+1)]
+            episode_stats = [total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_max_Q), episodic_reward/(total_episodes_elapsed+1)]
             stats.append(episode_stats)
 
+            # prints our statistics
+            print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_max_Q), episodic_reward/(total_episodes_elapsed+1))
             
             # when to save the model
-            if total_episodes_elapsed % hp['SAVE_MODEL'] == 0 and total_episodes_elapsed is not 0:
+            if total_episodes_elapsed+1 % hp['SAVE_MODEL'] == 0:
                 agent.save()
 
 

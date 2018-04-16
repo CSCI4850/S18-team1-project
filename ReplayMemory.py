@@ -20,7 +20,7 @@ class ReplayMemory:
         # set the state size, WIDTH : default 84px
         self.state_width = state_size[1]
 
-        # set the state size, DEPTH : default 4, for 4 frames
+        # set the state size, DEPTH : default 4, for 4+1 frames
         # we then extend it to make room for the current and next frame
         # current frame: [0, 1, 2, 3]
         # next frame: [1, 2, 3, 4]
@@ -38,7 +38,7 @@ class ReplayMemory:
         # default current index
         self.current_index = 0
 
-        # create the current state of the game (1,000,000, 64, 64, 4)
+        # create the current state of the game (1,000,000, 64, 64, 5)
         self.states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
 
         # reward array (1,000,000)
@@ -103,33 +103,31 @@ class ReplayMemory:
             # Slice memory into training sample
             # current state is frames [0, 1, 2, 3]
             # and normalize states [0,1] instead of 0-255
-            current_state = normalize_states(self.states[current_sample, :, :, 0:4])
+            current_states = normalize_states(self.states[current_sample, :, :, 0:4])
 
             # next_state is frames [1, 2, 3, 4]
             # and normalize states [0,1] instead of 0-255
-            next_state = normalize_states(self.states[current_sample, :, :, 1:5])
+            next_states = normalize_states(self.states[current_sample, :, :, 1:5])
 
             # get the rest of the items from memory
-            action = [self.action[j] for j in current_sample]
-            reward = self.reward[current_sample]
-            lost_life = [self.lost_life[j] for j in current_sample]
-            
-            lost_life_batch = np.array(lost_life) + 0
-            
+            actions = [self.action[j] for j in current_sample]
+            rewards = self.reward[current_sample]
+            lost_lives = [self.lost_life[j] for j in current_sample]
+                        
             # Obtain model's current Q-values
-            model_targets = model.predict(current_state)
+            model_targets = model.predict(current_states)
             
             # Create targets from argmax(Q(s+1,a+1))
             # Use the target model!
-            targets = reward + (1 - lost_life_batch) * gamma * np.amax(target_model.predict(next_state),axis=1)
+            targets = reward +  gamma * np.amax(target_model.predict(next_states),axis=1)
             # Absorb the reward on terminal state-action transitions
-            targets[lost_life] = reward[lost_life]
+            targets[lost_lives] = reward[lost_lives]
             # Update just the relevant parts of the model_target vector...
-            model_targets[range(sample_size), action] = targets
+            model_targets[range(sample_size), actions] = targets
             
             # Current State: (32, 84, 84, 4)
             # Model Targets: (32, 4)
 
             # Update the weights accordingly
-            model.fit(current_state, model_targets,
+            model.fit(current_states, model_targets,
                      epochs=1 ,verbose=show_fit, batch_size=sample_size)

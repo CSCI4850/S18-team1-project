@@ -112,9 +112,11 @@ class DQNAgent():
         model.add(keras.layers.Dense(self.action_space, activation = 'linear'))
 
         # try mse, mean squared error or logcosh, log of hyperbolic cosine
-        model.compile(loss = keras.losses.logcosh if hp['LOSS'] is 'logcosh'
-                        else keras.losses.mse    if hp['LOSS'] is 'mse'
-                        else keras.losses.logcosh,
+        model.compile(
+            
+        loss = keras.losses.logcosh if hp['LOSS'] is 'logcosh'
+                    else keras.losses.mse    if hp['LOSS'] is 'mse'
+                    else keras.losses.logcosh,
                       
         optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
                                           epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'Adam'
