@@ -168,10 +168,16 @@ class DQNAgent():
     def quit(self, mean_times, stats):
 
         # save the model
-        self.save()
-        
-        time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
+        self.save_weights()
+        self.save_stats(mean_times, stats)
 
+        # exit
+        print('Exiting..')
+        sys.exit()
+        
+        
+    def save_stats(self, mean_times, stats):
+        time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
         print('Saving stats..')
         # saving stats
         with open('stats/' + time + 'mean_times.data', 'wb') as f:
@@ -179,14 +185,10 @@ class DQNAgent():
         with open('stats/' + time + 'stats.data', 'wb') as f:
             pickle.dump(stats, f)
 
-        # exit
-        print('Exiting..')
-        sys.exit()
-
     # load the weights for the game from previous runs
     # Input: filename input
     # Output: None
-    def load(self, name):
+    def load_weights(self, name):
         name = 'weights/' + name
         print('Loading weights from: ', name)
         self.model.load_weights(name)
@@ -194,9 +196,9 @@ class DQNAgent():
     # saves the weights into a folder in ./weights/
     # Input:  filename
     # Output: None, saves the file into a folder
-    def save(self):
+    def save_weights(self):
         # set the file name
-        fn = 'weights/breakout-v4-weights-D-' + \
+        fn = 'weights/breakout-v4-weights-' + \
         str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
 
         print('Saving weights as: ', fn)

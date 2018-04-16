@@ -30,7 +30,7 @@ hp = {
                                        # winning a round
                                        # default: 2000
 
-        'SAVE_MODEL' : 2000,           # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 500,           # how many episodes should we go through until we save the model?
                                        # default: whenever
 
         'TARGET_UPDATE' : 10000,       # on what mod epochs should we update the target network?
