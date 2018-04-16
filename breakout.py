@@ -37,18 +37,15 @@ def preprocess(img):
 
 # prints statistics at the end of every episode
 def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, 
-                episodic_reward, total_reward, avg_reward, avg_Q,
-                episodic_avg_reward):
+                episodic_reward, total_reward, avg_reward, avg_Q):
     print('\nepisodes elapsed: {0:3d} | '    
           'frames elapsed: {1:6d} | '      
           'epsilon: {2:1.5f}\n'             
           'total reward: {3:3.0f} | '        
-          'episodic reward: {4:3.0f} | ' 
-          'episodic avg reward: {7:3.2f} | '
-          'total avg reward: {5:3.3f}\n'             
+          'reward this episode: {4:3.0f} | ' 
+          'avg reward/episode: {5:3.3f}\n'          
           'avg Q: {6:1.5f}\n'.format(total_episodes_elapsed, total_frames_elapsed, 
-                            epsilon, total_reward, episodic_reward ,avg_reward, avg_Q,
-                            episodic_avg_reward))
+                                     epsilon, total_reward, episodic_reward ,avg_reward, avg_Q))
     print(line_sep)
 
 # plots a graph of the game
@@ -99,7 +96,7 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
     total_episodes_elapsed = 0
 
     # total running reward:  all rewards between all episodes
-    total_reward = deque()
+    rewards = deque()
     
     # total running Q:  all Q between all episodes
     total_max_Q = deque()
@@ -170,7 +167,7 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
                 next_frame, reward, done, info = env.step(next_4_frame_action)
 
                 # have a running total
-                total_reward.append(reward)
+                rewards.append(reward)
 
                 # episodic reward
                 episodic_reward += reward
@@ -226,15 +223,18 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
                 if hp['RENDER_ENV'] is True:
                     env.render()        
 
+            total_reward = np.sum(rewards)
+            avg_reward_per_episode = total_reward / (total_episodes_elapsed+1)
+          
             # record stats
             times_window.append(episodic_frame)
             mean_time = np.mean(times_window)
             mean_times.append(mean_time)
-            episode_stats = [total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_max_Q), episodic_reward/(total_episodes_elapsed+1)]
+            episode_stats = [total_episodes_elapsed, total_frames_elapsed, episodic_reward, total_reward, avg_reward_per_episode, np.mean(total_max_Q)]
             stats.append(episode_stats)
-
+            
             # prints our statistics
-            print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, np.sum(total_reward), np.mean(total_reward), np.mean(total_max_Q), episodic_reward/(total_episodes_elapsed+1))
+            print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, total_reward, avg_reward_per_episode, np.mean(total_max_Q))
             
             # when to save the model
             if total_episodes_elapsed+1 % hp['SAVE_MODEL'] == 0:

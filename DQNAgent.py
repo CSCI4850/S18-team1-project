@@ -121,8 +121,8 @@ class DQNAgent():
                     else keras.losses.logcosh,
                       
         optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
-                                          epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'],
-                                          beta_1=hp['GRADIENT_MOMENTUM'] is 'Adam'
+                                          epsilon=hp['MIN_SQUARED_GRADIENT'],
+                                          beta_1=hp['GRADIENT_MOMENTUM']) if hp['OPTIMIZER'] is 'Adam'
                     else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
                                                   epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
                     
