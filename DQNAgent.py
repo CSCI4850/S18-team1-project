@@ -180,9 +180,9 @@ class DQNAgent():
         time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
         print('Saving stats..')
         # saving stats
-        with open('stats/' + time + 'mean_times.data', 'wb') as f:
+        with open('stats/' + time + 'D-mean_times.data', 'wb') as f:
             pickle.dump(mean_times, f)
-        with open('stats/' + time + 'stats.data', 'wb') as f:
+        with open('stats/' + time + 'D-stats.data', 'wb') as f:
             pickle.dump(stats, f)
 
     # load the weights for the game from previous runs
