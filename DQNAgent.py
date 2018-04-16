@@ -21,14 +21,14 @@ import datetime
 def find_action(action):
     # actions:
     # 0: no-op 1: fire 2: right 3: left
+    # ->
+    # 0: fire (no-op) 1: right 2: left
     action = int(action)
     if action is 0:
         return 'no-op'
     elif action is 1:
-        return 'fire'
-    elif action is 2:
         return 'move right'
-    elif action is 3:
+    elif action is 1:
         return 'move left'
 
 # DQNAgent for breakout
@@ -40,7 +40,9 @@ class DQNAgent():
         self.input_shape = input_shape
 
         # output layer mapped to an action
-        self.action_space = action_space
+        # since no-op and fire both are essentially no-op,
+        # reduce action space by 1
+        self.action_space = action_space-1
 
 
         if model is 'Dense':
@@ -119,7 +121,8 @@ class DQNAgent():
                     else keras.losses.logcosh,
                       
         optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
-                                          epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'Adam'
+                                          epsilon=hp['MIN_SQUARED_GRADIENT'],
+                                          beta_1=hp['GRADIENT_MOMENTUM']) if hp['OPTIMIZER'] is 'Adam'
                     else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
                                                   epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
                     
@@ -142,12 +145,12 @@ class DQNAgent():
         if np.random.rand() <= e:
             # select a random action
             rand = random.randrange(self.action_space)
-                
+            
             # print q and decision
             if hp['WATCH_Q']:
                 print ('Random Action! Q:', Q, 'decision:', find_action(rand))
             
-            return Q[0][rand], rand                  # returns action
+            return Q[0][rand], rand   # returns action
 
         # otherwise,
         else:

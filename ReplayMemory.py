@@ -20,11 +20,8 @@ class ReplayMemory:
         # set the state size, WIDTH : default 84px
         self.state_width = state_size[1]
 
-        # set the state size, DEPTH : default 4, for 4+1 frames
-        # we then extend it to make room for the current and next frame
-        # current frame: [0, 1, 2, 3]
-        # next frame: [1, 2, 3, 4]
-        self.state_depth = state_size[2] + 1 
+        # set the state size, DEPTH : default 4, for 4 frames
+        self.state_depth = state_size[2] 
 
         # set the action size, 4 actions
         self.action_size = action_size
@@ -38,10 +35,13 @@ class ReplayMemory:
         # default current index
         self.current_index = 0
 
-        # create the current state of the game (1,000,000, 64, 64, 5)
-        self.states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
+        # create the current states of the game (N, 64, 64, 4)
+        self.current_states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
+        
+        # create the next states of the game (N, 64, 64, 4)
+        self.next_states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
 
-        # reward array (1,000,000)
+        # reward array (N)
         self.reward = np.zeros([memory_size], dtype=np.uint8)
 
         # integer action
@@ -50,19 +50,11 @@ class ReplayMemory:
         # Boolean (terminal transition?)
         self.lost_life = [False]*memory_size 
 
-    def remember(self, current_state, action, reward, next_state, lost_life):
-
-        # create an extended frame state
-        frame_state = np.zeros([84, 84, 5], dtype=np.uint8)
-
-        # append the current state, 0, 1, 2, 3
-        frame_state[:, :, 0:4] = current_state
-        # get the last state, 4
-        frame_state[:, :, 4] = next_state[:, :, 3]
-
+    def remember(self, current_states, action, reward, next_states, lost_life):
 
         # Stores a single memory item
-        self.states[self.current_index,:] = frame_state
+        self.current_states[self.current_index,:] = current_states
+        self.next_states[self.current_index,:] = next_states
         
         # get the rest of the items
         self.action[self.current_index] = action
@@ -82,7 +74,7 @@ class ReplayMemory:
         num_samples = hp['REPLAY_ITERATIONS']
 
         # set the sample size out of the memory bank 
-        sample_size = hp['REPLAY_SAMPLE_SIZE']
+        sample_size = hp['BATCH_SIZEw']
 
         # discount rate
         gamma = hp['GAMMA']
@@ -103,11 +95,11 @@ class ReplayMemory:
             # Slice memory into training sample
             # current state is frames [0, 1, 2, 3]
             # and normalize states [0,1] instead of 0-255
-            current_states = normalize_states(self.states[current_sample, :, :, 0:4])
+            current_states = normalize_states(self.states[current_sample, :, :, :])
 
             # next_state is frames [1, 2, 3, 4]
             # and normalize states [0,1] instead of 0-255
-            next_states = normalize_states(self.states[current_sample, :, :, 1:5])
+            next_states = normalize_states(self.states[current_sample, :, :, :])
 
             # get the rest of the items from memory
             actions = [self.action[j] for j in current_sample]
@@ -119,7 +111,7 @@ class ReplayMemory:
             
             # Create targets from argmax(Q(s+1,a+1))
             # Use the target model!
-            targets = reward +  gamma * np.amax(target_model.predict(next_states),axis=1)
+            targets = reward +  gamma * np.amax(target_model.predict(next_states), axis=1)
             # Absorb the reward on terminal state-action transitions
             targets[lost_lives] = reward[lost_lives]
             # Update just the relevant parts of the model_target vector...

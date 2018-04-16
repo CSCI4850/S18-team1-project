@@ -71,11 +71,6 @@ def find_max_lives(env):
     _, _, _, info = env.step(0)
     return info['ale.lives']    # return max lives
 
-# checks whether we have lost a life
-# used to send that into done rather than waiting until and episode is done
-def check_lives(life, current_life):
-    return ( True if life > current_life else False )
-
 # main loop, runs everything
 def run(model, agent, target_agent, memory, env, mean_times, stats):
 
@@ -93,6 +88,8 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
 
     # reward: reward for a particular frame
     reward = 0
+    
+    total_frame_reward = 0
 
     # total frames: total number of frames elapsed
     # a frame is one instance of each tick of the clock of the game
@@ -106,17 +103,13 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
     total_reward = deque()
     
     # total running Q:  all Q between all episodes
-    total_max_Q = deque()
+    total_max_Q = deque(maxlen=100)
     
     # initialize a greedy-e default: 1.0
     e = hp['INIT_EXPLORATION']
     
     # initialize max lives to the maximum
     max_lives = find_max_lives(env)
-    
-    # overlapping frame history buffer used to store past frames
-    # of size frame FRAME_SKIP_SIZE + 1
-    frame_history = np.zeros([84, 84, 5], dtype=np.uint8)
     
     # current frame history of size 4
     current_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
@@ -152,65 +145,64 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
             # while the episode is not done,
             while not done:
                 
+                total_frame_reward = 0
+                
                 # e-greedy scaled linearly over time
                 # starts at 1.0 ends at 0.1
                 if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
                     e -= e_step
+                    
+                # get Q value
+                Q = agent.model.predict(normalize_frames(current_frame_history))
+                
+                # pick an action
+                max_Q, action = agent.act(Q, e)
+
+                # increase the total Q value
+                total_max_Q.append(max_Q)
 
                 # determine an action every 4 frames
-                if episodic_frame % hp['FRAME_SKIP_SIZE'] == 0:
-                    # get Q value
-                    Q = agent.model.predict(normalize_frames(current_frame_history))
+                for i in range (hp['FRAME_SKIP_SIZE']):
+                    
+                    # increase actual total frames elapsed
+                    total_frames_elapsed += 1
 
-                    # pick an action
-                    max_Q, next_4_frame_action = agent.act(Q, e)
+                    # collect the next frame frames, reward, and done flag
+                    # and act upon the environment by stepping with some action
+                    # increase action 1 to skip no-op and replace with 
+                    next_frame, reward, done, info = env.step(action + 1)
 
-                    # increase the total Q value
-                    total_max_Q.append(max_Q)
+                    # have a running total
+                    total_reward.append(reward)
 
-
-                # collect the next frame frames, reward, and done flag
-                # and act upon the environment by stepping with some action
-                next_frame, reward, done, info = env.step(next_4_frame_action)
-
-                # have a running total
-                total_reward.append(reward)
-
-                # episodic reward
-                episodic_reward += reward
+                    # episodic reward
+                    total_frame_reward += reward
+                    
+                    # fill the next frame history
+                    next_frame_history[:,:,i] = preprocess(next_frame)
+                
+                episodic_reward += total_frame_reward
                 
                 # clip the reward between [-1, 1]
                 # may or may not affect breakout
-                clipped_reward = np.clip(reward, -1, 1)
+                clipped_reward = np.clip(total_frame_reward, -1, 1)
                 
                 # capture how many lives we now have after taking another step
                 # used in place of done in remmeber because an episode is technically
                 # only as long as the agent is alive, speeds up training
-                current_lives = check_lives(lives, info['ale.lives'])
-
-                # preprocess the next frame
-                processed_next_frame = preprocess(next_frame)
-                
-                # add the next frame, 4th item is new frame
-                frame_history[:, :, 4] = processed_next_frame
-
-                # [1, 2, 3, 4], 4 frames
-                next_frame_history = frame_history[:, :, 1:]
+                current_lives = info['ale.lives']
+                # checks whether we have lost a life
+                # used to send that into done rather than waiting until an episode is done
+                died = lives > current_lives
 
                 # remember the current and next frame with their actions
-                memory.remember(current_frame_history, next_4_frame_action, 
-                                clipped_reward, next_frame_history, current_lives)
-
-                # increase the frame counter
-                total_frames_elapsed += 1
-                episodic_frame += 1
-
-                # current is now the next frame
-                current_frame_history = next_frame_history
-                # update frame history
-                # [0, 1, 2, 3] <- [1, 2, 3, 4]
-                frame_history[:, :, :4] = frame_history[:, :, 1:]
+                memory.remember(current_frame_history, action, 
+                                clipped_reward, next_frame_history, died)
                 
+                # set the next frame history
+                current_frame_history = next_frame_history
+                # set new lives
+                lives = current_lives
                 
                 # if we have begun training
                 if total_frames_elapsed > hp['REPLAY_START']:
