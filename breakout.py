@@ -71,10 +71,6 @@ def find_max_lives(env):
     _, _, _, info = env.step(0)
     return info['ale.lives']    # return max lives
 
-# checks whether we have lost a life
-# used to send that into done rather than waiting until and episode is done
-def check_lives(life, current_life):
-    return ( True if life > current_life else False )
 
 # main loop, runs everything
 def run(model, agent, target_agent, memory, env, mean_times, stats):
@@ -186,7 +182,10 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
                 # capture how many lives we now have after taking another step
                 # used in place of done in remmeber because an episode is technically
                 # only as long as the agent is alive, speeds up training
-                current_lives = check_lives(lives, info['ale.lives'])
+                current_lives = info['ale.lives']
+                # checks whether we have lost a life
+                # used to send that into done rather than waiting until an episode is done
+                died = lives > current_lives
 
                 # preprocess the next frame
                 processed_next_frame = preprocess(next_frame)
@@ -199,7 +198,7 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
 
                 # remember the current and next frame with their actions
                 memory.remember(current_frame_history, next_4_frame_action, 
-                                clipped_reward, next_frame_history, current_lives)
+                                clipped_reward, next_frame_history, died)
 
                 # increase the frame counter
                 total_frames_elapsed += 1
@@ -210,6 +209,9 @@ def run(model, agent, target_agent, memory, env, mean_times, stats):
                 # update frame history
                 # [0, 1, 2, 3] <- [1, 2, 3, 4]
                 frame_history[:, :, :4] = frame_history[:, :, 1:]
+
+                # set new lives
+                lives = current_lives
                 
                 
                 # if we have begun training

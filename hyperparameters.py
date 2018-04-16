@@ -39,7 +39,7 @@ hp = {
         ###-----------------------------------###
         ### hyper parameters for the DQNAgent ###
         ###-----------------------------------###
-        'WATCH_Q' : False,             # watch the Q function and see what decision it picks
+        'WATCH_Q' : True,             # watch the Q function and see what decision it picks
                                        # cool to watch
                                        # default: False
 
@@ -47,17 +47,20 @@ hp = {
                                        # default: 0.00025
         
         'INIT_EXPLORATION' : 1.0,      # exploration rate, start at 100%
-        'EXPLORATION' : 1000000,       # how many frames we decay till
-        'MIN_EXPLORATION' : 0.1,       # ending exploration rate
+        'EXPLORATION' : 100000,        # how many frames we decay till
+        'MIN_EXPLORATION' : 0.01,      # ending exploration rate
                                        # defaults: 1.0, 1,000,000, 0.1
     
-        'OPTIMIZER' : 'RMSprop',       # optimizer used
+        'OPTIMIZER' : 'Adam',          # optimizer used
                                        # default: RMSprop or Adam
     
         'MIN_SQUARED_GRADIENT' : 0.01, # epsilon rate
                                        # default: 0.01
+    
+        'GRADIENT_MOMENTUM' : 0.95,    # momentum into the gradient used
+                                       # default: 0.95
 
-        'LOSS' : 'mse',                # can be 'logcosh' for logarithm of hyperbolic cosine
+        'LOSS' : 'logcosh',            # can be 'logcosh' for logarithm of hyperbolic cosine
                                        # or 'mse' for mean squared error
                                        # default: logcosh or mse
         
@@ -75,7 +78,7 @@ hp = {
         'REPLAY_START' : 50000,        # when to start using replay to update the model
                                        # default: 50000 frames
 
-        'MEMORY_SIZE' : 1000000,       # size of the memory bank
+        'MEMORY_SIZE' : 700000,       # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 
@@ -85,7 +88,7 @@ hp = {
         'REPLAY_ITERATIONS' : 4,       # how many irerations of replay
                                        # default: 4
 
-        'REPLAY_SAMPLE_SIZE' : 8       # batch size used to learn
+        'BATCH_SIZE' : 8               # batch size used to learn
                                        # default: 8
 
 }
