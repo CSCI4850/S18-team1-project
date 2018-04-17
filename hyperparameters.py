@@ -28,11 +28,11 @@ hp = {
                                        # that many frames.
                                        # default: 4
     
-        'MAX_EPISODES' : 12000,         # defined as how many cycles of full life to end life or
+        'MAX_EPISODES' : 12000,        # defined as how many cycles of full life to end life or
                                        # winning a round
                                        # default: 2000
 
-        'SAVE_MODEL' : 2000,           # how many episodes should we go through until we save the model?
+        'SAVE_MODEL' : 500,            # how many episodes should we go through until we save the model?
                                        # default: whenever
 
         'TARGET_UPDATE' : 10000,       # on what mod epochs should we update the target network?

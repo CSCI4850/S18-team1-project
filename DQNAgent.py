@@ -135,12 +135,10 @@ class DQNAgent():
         # save the model
         self.save_weights()
         self.save_stats(stats)
-
         # exit
         print('Exiting..')
         sys.exit()
-        
-        
+               
     def save_stats(self, stats):
         time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
         print('Saving stats..')

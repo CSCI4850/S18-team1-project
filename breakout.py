@@ -38,6 +38,7 @@ def preprocess(img):
 # prints statistics at the end of every episode
 def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, 
                 episodic_reward, total_reward, avg_reward, avg_Q, time_elapsed):
+
     print('\nepisodes elapsed: {0:3d} | '    
           'frames elapsed: {1:6d} | '      
           'epsilon: {2:1.5f}\n'             
@@ -75,7 +76,8 @@ def find_max_lives(env):
     # don't step anywhere, but grab info
     _, _, _, info = env.step(0)
     return info['ale.lives']    # return max lives
-
+  
+  
 # main loop, runs everything
 def run_discrete(model, agent, target_agent, memory, env, stats):
 
@@ -233,6 +235,7 @@ def run_discrete(model, agent, target_agent, memory, env, stats):
         # when to save the model
         if total_episodes_elapsed+1 % hp['SAVE_MODEL'] == 0:
             agent.save()
+
 
 # main loop, runs everything
 def run_frame_sliding(model, agent, target_agent, memory, env, stats):
@@ -430,7 +433,7 @@ def main():
     
     # to load weights
     if (hp['LOAD_WEIGHTS']):
-        agent.load(hp['LOAD_WEIGHTS'])
+        agent.load_weights(hp['LOAD_WEIGHTS'])
 
     # and a target DQN Agent
     target_agent = DQNAgent(new_input_space, action_space, model)
