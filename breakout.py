@@ -77,13 +77,9 @@ def find_max_lives(env):
     _, _, _, info = env.step(0)
     return info['ale.lives']    # return max lives
   
-  
-# main loop, runs everything
-def run_discrete(model, agent, target_agent, memory, env, stats):
 
-    # set an environemntal seed
-    env.seed(0)
-    np.rand.seed(0)
+# main loop, runs everything
+def run_discrete(agent, target_agent, memory, env, stats, start_time):
 
     # initialize an observation of the game
     current_frame = env.reset()
@@ -91,7 +87,7 @@ def run_discrete(model, agent, target_agent, memory, env, stats):
     # flag for whether we die or win a round
     done = False
     
-    total_frame_reward = 0
+    total_frame_reward = episodic_reward = 0
 
     # total frames: total number of frames elapsed
     # a frame is one instance of each tick of the clock of the game
@@ -108,7 +104,7 @@ def run_discrete(model, agent, target_agent, memory, env, stats):
     total_max_Q = deque(maxlen=100)
     
     # initialize max lives to the maximum
-    max_lives = find_max_lives(env)
+    max_lives = lives = find_max_lives(env)
     
     # current frame history of size 4
     current_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
@@ -125,7 +121,7 @@ def run_discrete(model, agent, target_agent, memory, env, stats):
 
     # iterate through a total amount of episodes
     for total_episodes_elapsed in range(hp['MAX_EPISODES']):
-
+        
         if done:
             current_frame = env.reset()     # reset the game
             lives = max_lives     # reset the number of lives we have
@@ -238,11 +234,7 @@ def run_discrete(model, agent, target_agent, memory, env, stats):
 
 
 # main loop, runs everything
-def run_frame_sliding(model, agent, target_agent, memory, env, stats):
-
-    # set an environemntal seed
-    env.seed(0)
-    np.rand.seed(0)
+def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
 
     # initialize an observation of the game
     current_frame = env.reset()
@@ -250,7 +242,7 @@ def run_frame_sliding(model, agent, target_agent, memory, env, stats):
     # flag for whether we die or win a round
     done = False
     
-    total_frame_reward = 0
+    total_frame_reward = episodic_reward = 0
 
     # total frames: total number of frames elapsed
     # a frame is one instance of each tick of the clock of the game
@@ -267,7 +259,7 @@ def run_frame_sliding(model, agent, target_agent, memory, env, stats):
     total_max_Q = deque(maxlen=100)
     
     # initialize max lives to the maximum
-    max_lives = find_max_lives(env)
+    max_lives = lives = find_max_lives(env)
     
     # sliding frame history
     frame_history = np.zeros([84, 84, 5], dtype=np.uint8)
@@ -314,7 +306,7 @@ def run_frame_sliding(model, agent, target_agent, memory, env, stats):
                 e -= e_step
                 
             # get Q value
-            Q = agent.model.predict(normalize_frames(frame_history))
+            Q = agent.model.predict(normalize_frames(frame_history[:, :, :4]))
             
             # pick an action
             max_Q, action = agent.act(Q, e)
@@ -407,46 +399,57 @@ def main():
 
     # start time of the program
     start_time = time.time()
-
+    
     # pixel/frame data
     env = gym.make(hp['GAME'])
+    
+    # set an environemntal seed
+    env.seed(0)
+    np.random.seed(0)
 
     # 4 actions
     # 0: no-op 1: fire 2: right 3: left
-    action_space = env.action_space.n
+    # -> 0: fire (no-op) 1: right 2: left
+    action_space = env.action_space.n - 1
 
     # returns a tuple, (210, 160, 3)
     input_space = env.observation_space.shape[0]
-
+    
     # create a new 3 dimensional space for a downscaled grayscale image
-    new_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']], dtype=np.uint8)
-
+    agent_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']], dtype=np.uint8)
+    
+    if hp['DISCRETE_FRAMING']:
+        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']], dtype=np.uint8)
+    else:
+        # create a new 3 dimensional space for a downscaled grayscale image
+        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']+1], dtype=np.uint8)
+        
     # print the initial state
-    print('FRAME input:', input_space, 'NEW input:', new_input_space,
-          'ACTION output:', action_space, 'DISCRETE FRAME SAVING:', hp['DISCRETE_FRAMING'])
+    print('AGENT FRAME input:', agent_input_space.shape, 'DISCRETE FRAME SAVING:', hp['DISCRETE_FRAMING'], 
+          'MEMORY input:', memory_input_space.shape, 'ACTION output:', action_space)
 
     # performance
     stats = []
 
     # create a DQN Agent
-    agent = DQNAgent(new_input_space, action_space, model)
+    agent = DQNAgent(agent_input_space, action_space)
+    
+    # and a target DQN Agent
+    target_agent = DQNAgent(agent_input_space, action_space)
     
     # to load weights
     if (hp['LOAD_WEIGHTS']):
         agent.load_weights(hp['LOAD_WEIGHTS'])
 
-    # and a target DQN Agent
-    target_agent = DQNAgent(new_input_space, action_space, model)
-
     # create a memory for remembering and replay
-    memory = ReplayMemory(hp['MEMORY_SIZE'], new_input_space, action_space)
+    memory = ReplayMemory(hp['MEMORY_SIZE'], memory_input_space, action_space)
 
     if hp['DISCRETE_FRAMING']:
         # run the main loop of the game
-        run_discrete(model, agent, target_agent, memory, env, stats)
+        run_discrete(agent, target_agent, memory, env, stats, start_time)
 
     else:
-        run_frame_sliding(model, agent, target_agent, memory, env, stats)
+        run_frame_sliding(agent, target_agent, memory, env, stats, start_time)
 
     # end time of the program
     end_time = time.time()

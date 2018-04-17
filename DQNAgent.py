@@ -40,9 +40,7 @@ class DQNAgent():
         self.input_shape = input_shape
 
         # output layer mapped to an action
-        # since no-op and fire both are essentially no-op,
-        # reduce action space by 1
-        self.action_space = action_space-1
+        self.action_space = action_space
 
 
         self.model = self.build_model()
@@ -146,11 +144,11 @@ class DQNAgent():
         if hp['DISCRETE_FRAMING']:
             # saving stats
             with open('stats/' + time + '_discrete_stats.data', 'wb') as f:
-            pickle.dump(stats, f)
+                pickle.dump(stats, f)
         else:
             # saving stats
             with open('stats/' + time + '_stats.data', 'wb') as f:
-            pickle.dump(stats, f)
+                pickle.dump(stats, f)
 
     # load the weights for the game from previous runs
     # Input: filename input

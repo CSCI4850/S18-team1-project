@@ -11,7 +11,7 @@ hp = {
         'GAME' : 'BreakoutDeterministic-v4', # Name of which game to use
                                              # v1-4 Deterministic or Not
 
-        'DISCRETE_FRAMING' : True      # 2 discrete sets of frames stored in memory
+        'DISCRETE_FRAMING' : False,      # 2 discrete sets of frames stored in memory
     
         'LOAD_WEIGHTS' : '',           # Loads weights into the model if so desired
                                        # leave '' if starting from a new model
@@ -49,8 +49,8 @@ hp = {
                                        # default: 0.00025
         
         'INIT_EXPLORATION' : 1.0,      # exploration rate, start at 100%
-        'EXPLORATION' : 1000000,        # how many frames we decay till
-        'MIN_EXPLORATION' : 0.01,      # ending exploration rate
+        'EXPLORATION' : 1000000,       # how many frames we decay till
+        'MIN_EXPLORATION' : 0.1,       # ending exploration rate
                                        # defaults: 1.0, 1,000,000, 0.1
     
         'OPTIMIZER' : 'Adam',          # optimizer used

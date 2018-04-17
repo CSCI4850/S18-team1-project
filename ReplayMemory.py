@@ -19,12 +19,13 @@ class ReplayMemory:
 
         # set the state size, WIDTH : default 84px
         self.state_width = state_size[1]
-
-        # set the state size, DEPTH : default 4, for 4 frames
+    
+        # set the state size, DEPTH : default 4 for discrete frame sets, for 4 frames
+        # 5 with frame windows
         self.state_depth = state_size[2] 
-
+        
         # set the action size, 3 actions, minus the first no-op
-        self.action_size = action_size-1
+        self.action_size = action_size
 
         # initial size
         self.size = 0
@@ -39,12 +40,12 @@ class ReplayMemory:
             # create the current states of the game (N, 64, 64, 4)
             self.current_states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
             
-            # create the next states of the game (N, 64, 64, 4)
+            # create the next states of the game (N, 64, 64, 5)
             self.next_states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
         
         # used if using frame sliding
         else:
-            self.states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth + 1], dtype=np.uint8)
+            self.states = np.zeros([memory_size, self.state_height, self.state_width, self.state_depth], dtype=np.uint8)
 
         # reward array (N)
         self.reward = np.zeros([memory_size], dtype=np.uint8)
