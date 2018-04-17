@@ -33,7 +33,7 @@ def find_action(action):
 
 # DQNAgent for breakout
 class DQNAgent():
-    def __init__(self, input_shape, action_space, model='Dense'):
+    def __init__(self, input_shape, action_space):
 
         # input layer into our first dense layer
         # with downsample: (210, 160, 3) -> (64, 64, 4)
@@ -45,45 +45,11 @@ class DQNAgent():
         self.action_space = action_space-1
 
 
-        if model is 'Dense':
-            # build the dense model model
-            self.model = self.build_dense_model()
-
-        elif model is 'Convolutional':
-            # build the convolutional model
-            self.model = self.build_convolutional_model()
-
-    # build the model
-    # Input:  none
-    # Output: Returns the built and compiled model
-    def build_dense_model(self):
-
-        # create a sequential, dqn model
-        model = Sequential()
-
-        # 24 layer dense relu, 128 input dimension
-        model.add(Dense(48, input_dim=1, activation='relu'))
-
-        # another 24 dense relu
-        model.add(Dense(24, activation='relu'))
-
-        # a final linear activation for a certain action (move left, move right, noop, fire)
-        model.add(Dense(self.action_space, activation='linear'))
-
-        # compile the model
-        # try mean squared error or logcosh, clog of hyperbolic cosine
-        model.compile(loss = 'mse',
-                      optimizer = keras.optimizers.Adam(lr=self.learning_rate),
-                      metrics = ['accuracy'])
-
-        # show summary
-        model.summary()
-
-        # return the built and compiled model
-        return model
+        self.model = self.build_model()
 
 
-    def build_convolutional_model(self):
+
+    def build_model(self):
 
         # create a sequential, dqn model
         model = Sequential()
@@ -161,32 +127,37 @@ class DQNAgent():
                 print ('Q:', Q, 'decision:', find_action(decision))
 
             return Q[0][decision], decision          # returns action
-
     # hard exits the game
     # Input: None
     # Ouput: None, but saves and exits the game
-    def quit(self, mean_times, stats):
+    def quit(self, stats):
 
         # save the model
-        self.save()
-        
-        time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
-
-        print('Saving stats..')
-        # saving stats
-        with open('stats/' + time + 'mean_times.data', 'wb') as f:
-            pickle.dump(mean_times, f)
-        with open('stats/' + time + 'stats.data', 'wb') as f:
-            pickle.dump(stats, f)
+        self.save_weights()
+        self.save_stats(stats)
 
         # exit
         print('Exiting..')
         sys.exit()
+        
+        
+    def save_stats(self, stats):
+        time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
+        print('Saving stats..')
+        
+        if hp['DISCRETE_FRAMING']:
+            # saving stats
+            with open('stats/' + time + '_discrete_stats.data', 'wb') as f:
+            pickle.dump(stats, f)
+        else:
+            # saving stats
+            with open('stats/' + time + '_stats.data', 'wb') as f:
+            pickle.dump(stats, f)
 
     # load the weights for the game from previous runs
     # Input: filename input
     # Output: None
-    def load(self, name):
+    def load_weights(self, name):
         name = 'weights/' + name
         print('Loading weights from: ', name)
         self.model.load_weights(name)
@@ -194,13 +165,14 @@ class DQNAgent():
     # saves the weights into a folder in ./weights/
     # Input:  filename
     # Output: None, saves the file into a folder
-    def save(self):
+    def save_weights(self):
         # set the file name
-        fn = 'weights/breakout-v4-weights-D-' + \
+        fn = 'weights/breakout-v4-weights-' + \
         str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
 
         print('Saving weights as: ', fn)
         self.model.save_weights(fn)
+
 
     # updates the target model
     # Input:  Q model

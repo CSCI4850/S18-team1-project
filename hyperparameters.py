@@ -10,6 +10,8 @@ hp = {
     
         'GAME' : 'BreakoutDeterministic-v4', # Name of which game to use
                                              # v1-4 Deterministic or Not
+
+        'DISCRETE_FRAMING' : True      # 2 discrete sets of frames stored in memory
     
         'LOAD_WEIGHTS' : '',           # Loads weights into the model if so desired
                                        # leave '' if starting from a new model
@@ -47,7 +49,7 @@ hp = {
                                        # default: 0.00025
         
         'INIT_EXPLORATION' : 1.0,      # exploration rate, start at 100%
-        'EXPLORATION' : 500000,        # how many frames we decay till
+        'EXPLORATION' : 1000000,        # how many frames we decay till
         'MIN_EXPLORATION' : 0.01,      # ending exploration rate
                                        # defaults: 1.0, 1,000,000, 0.1
     
@@ -78,7 +80,7 @@ hp = {
         'REPLAY_START' : 50000,        # when to start using replay to update the model
                                        # default: 50000 frames
 
-        'MEMORY_SIZE' : 700000,       # size of the memory bank
+        'MEMORY_SIZE' : 1000000,       # size of the memory bank
                                        # default: 1,000,000
 
         'GAMMA' : 0.99,                # integration of rewards, discount factor, 
