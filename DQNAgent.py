@@ -21,67 +21,35 @@ import datetime
 def find_action(action):
     # actions:
     # 0: no-op 1: fire 2: right 3: left
+    # ->
+    # 0: fire (no-op) 1: right 2: left
     action = int(action)
     if action is 0:
         return 'no-op'
     elif action is 1:
-        return 'fire'
-    elif action is 2:
         return 'move right'
-    elif action is 3:
+    elif action is 1:
         return 'move left'
 
 # DQNAgent for breakout
 class DQNAgent():
-    def __init__(self, input_shape, action_space, model='Dense'):
+    def __init__(self, input_shape, action_space):
 
         # input layer into our first dense layer
         # with downsample: (210, 160, 3) -> (64, 64, 4)
         self.input_shape = input_shape
 
         # output layer mapped to an action
-        self.action_space = action_space
+        # since no-op and fire both are essentially no-op,
+        # reduce action space by 1
+        self.action_space = action_space-1
 
 
-        if model is 'Dense':
-            # build the dense model model
-            self.model = self.build_dense_model()
-
-        elif model is 'Convolutional':
-            # build the convolutional model
-            self.model = self.build_convolutional_model()
-
-    # build the model
-    # Input:  none
-    # Output: Returns the built and compiled model
-    def build_dense_model(self):
-
-        # create a sequential, dqn model
-        model = Sequential()
-
-        # 24 layer dense relu, 128 input dimension
-        model.add(Dense(48, input_dim=1, activation='relu'))
-
-        # another 24 dense relu
-        model.add(Dense(24, activation='relu'))
-
-        # a final linear activation for a certain action (move left, move right, noop, fire)
-        model.add(Dense(self.action_space, activation='linear'))
-
-        # compile the model
-        # try mean squared error or logcosh, clog of hyperbolic cosine
-        model.compile(loss = 'mse',
-                      optimizer = keras.optimizers.Adam(lr=self.learning_rate),
-                      metrics = ['accuracy'])
-
-        # show summary
-        model.summary()
-
-        # return the built and compiled model
-        return model
+        self.model = self.build_model()
 
 
-    def build_convolutional_model(self):
+
+    def build_model(self):
 
         # create a sequential, dqn model
         model = Sequential()
@@ -119,7 +87,8 @@ class DQNAgent():
                     else keras.losses.logcosh,
                       
         optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
-                                          epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'Adam'
+                                          epsilon=hp['MIN_SQUARED_GRADIENT'],
+                                          beta_1=hp['GRADIENT_MOMENTUM']) if hp['OPTIMIZER'] is 'Adam'
                     else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
                                                   epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
                     
@@ -142,12 +111,12 @@ class DQNAgent():
         if np.random.rand() <= e:
             # select a random action
             rand = random.randrange(self.action_space)
-                
+            
             # print q and decision
             if hp['WATCH_Q']:
                 print ('Random Action! Q:', Q, 'decision:', find_action(rand))
             
-            return Q[0][rand], rand                  # returns action
+            return Q[0][rand], rand   # returns action
 
         # otherwise,
         else:
@@ -158,28 +127,29 @@ class DQNAgent():
                 print ('Q:', Q, 'decision:', find_action(decision))
 
             return Q[0][decision], decision          # returns action
-
     # hard exits the game
     # Input: None
     # Ouput: None, but saves and exits the game
-    def quit(self, mean_times, stats):
+    def quit(self, stats):
 
         # save the model
         self.save_weights()
-        self.save_stats(mean_times, stats)
-
+        self.save_stats(stats)
         # exit
         print('Exiting..')
         sys.exit()
-        
-        
-    def save_stats(self, mean_times, stats):
+               
+    def save_stats(self, stats):
         time = str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
         print('Saving stats..')
-        # saving stats
-        with open('stats/' + time + 'mean_times.data', 'wb') as f:
-            pickle.dump(mean_times, f)
-        with open('stats/' + time + 'stats.data', 'wb') as f:
+        
+        if hp['DISCRETE_FRAMING']:
+            # saving stats
+            with open('stats/' + time + '_discrete_stats.data', 'wb') as f:
+            pickle.dump(stats, f)
+        else:
+            # saving stats
+            with open('stats/' + time + '_stats.data', 'wb') as f:
             pickle.dump(stats, f)
 
     # load the weights for the game from previous runs
@@ -200,6 +170,7 @@ class DQNAgent():
 
         print('Saving weights as: ', fn)
         self.model.save_weights(fn)
+
 
     # updates the target model
     # Input:  Q model
