@@ -162,12 +162,19 @@ class DQNAgent():
     # Input:  filename
     # Output: None, saves the file into a folder
     def save_weights(self):
-        # set the file name
-        fn = 'weights/breakout-v4-weights-' + \
-        str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
-
+        
+        if hp['DISCRETE_FRAMING']:
+            # set the file name
+            fn = 'weights/breakout-v4-weights-D-' + \
+            str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
+        else:
+            # set the file name
+            fn = 'weights/breakout-v4-weights-' + \
+            str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
+     
         print('Saving weights as: ', fn)
-        self.model.save_weights(fn)
+        if hp['DISCRETE_FRAMING']:
+            self.model.save_weights(fn)
 
 
     # updates the target model

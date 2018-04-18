@@ -122,6 +122,9 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
     # iterate through a total amount of episodes
     for total_episodes_elapsed in range(hp['MAX_EPISODES']):
         
+        if total_frames_elapsed > hp['MAX_FRAMES']:
+            break
+        
         if done:
             current_frame = env.reset()     # reset the game
             lives = max_lives     # reset the number of lives we have
@@ -145,8 +148,8 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
             
             # e-greedy scaled linearly over time
             # starts at 1.0 ends at 0.1
-            if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
-                e -= e_step
+            #if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
+            #    e -= e_step
                 
             # get Q value
             Q = agent.model.predict(normalize_frames(current_frame_history))
@@ -160,6 +163,11 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
             # determine an action every 4 frames
             for i in range (hp['FRAME_SKIP_SIZE']):
 
+                # e-greedy scaled linearly over time
+                # starts at 1.0 ends at 0.1
+                if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
+                    e -= e_step
+                
                 # renders each frame
                 #if hp['RENDER_ENV']:
                 #    env.render() 
@@ -279,6 +287,9 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
 
     # iterate through a total amount of episodes
     for total_episodes_elapsed in range(hp['MAX_EPISODES']):
+        
+        if total_frames_elapsed > hp['MAX_FRAMES']:
+            break
 
         if done:
             current_frame = env.reset()     # reset the game
@@ -300,11 +311,6 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
             
             total_frame_reward = 0
             
-            # e-greedy scaled linearly over time
-            # starts at 1.0 ends at 0.1
-            if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
-                e -= e_step
-                
             # get Q value
             Q = agent.model.predict(normalize_frames(frame_history[:, :, :4]))
             
@@ -316,6 +322,12 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
 
             # determine an action every 4 frames
             for i in range (hp['FRAME_SKIP_SIZE']):
+                
+                # e-greedy scaled linearly over time
+                # starts at 1.0 ends at 0.1
+                if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
+                    e -= e_step
+                
 
                 # renders each frame
                 #if hp['RENDER_ENV']:

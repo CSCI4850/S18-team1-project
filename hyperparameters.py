@@ -31,6 +31,9 @@ hp = {
         'MAX_EPISODES' : 12000,        # defined as how many cycles of full life to end life or
                                        # winning a round
                                        # default: 2000
+        'MAX_FRAMES' : 1750000,        # defined as how many cycles of full life to end life or
+                                       # winning a round
+                                       # default: 2000
 
         'SAVE_MODEL' : 500,            # how many episodes should we go through until we save the model?
                                        # default: whenever
