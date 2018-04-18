@@ -237,7 +237,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
         print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, total_reward, avg_reward_per_episode, np.mean(total_max_Q), time_elapsed)
         
         # when to save the model
-        if total_episodes_elapsed+1 % hp['SAVE_MODEL'] == 0:
+        if (total_episodes_elapsed+1) % hp['SAVE_MODEL'] == 0:
             agent.save()
 
 
@@ -403,7 +403,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
         print_stats(total_episodes_elapsed, total_frames_elapsed, e, episodic_reward, total_reward, avg_reward_per_episode, np.mean(total_max_Q), time_elapsed)
         
         # when to save the model
-        if total_episodes_elapsed+1 % hp['SAVE_MODEL'] == 0:
+        if (total_episodes_elapsed+1) % hp['SAVE_MODEL'] == 0:
             agent.save()
 
 
