@@ -238,7 +238,10 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
         
         # when to save the model
         if (total_episodes_elapsed+1) % hp['SAVE_MODEL'] == 0:
-            agent.save()
+            agent.save_weights()
+            agent.save_stats(stats)
+            
+            
 
 
 # main loop, runs everything
@@ -404,7 +407,8 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
         
         # when to save the model
         if (total_episodes_elapsed+1) % hp['SAVE_MODEL'] == 0:
-            agent.save()
+            agent.save_weights()
+            agent.save_stats(stats)
 
 
 def main():
