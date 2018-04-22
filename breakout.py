@@ -152,11 +152,6 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
             
             total_frame_reward = 0
             
-            # e-greedy scaled linearly over time
-            # starts at 1.0 ends at 0.1
-            #if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
-            #    e -= e_step
-                
             # get Q value
             Q = agent.model.predict(normalize_frames(current_frame_history[:, :, :, :]))
             
@@ -232,6 +227,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
         # total time in seconds
         time_elapsed = end_episode_time - start_time
 
+        # calculate the total and average reward
         total_reward = np.sum(rewards)
         avg_reward_per_episode = total_reward / (total_episodes_elapsed+1)
       
@@ -355,9 +351,10 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
 
                 # episodic reward
                 total_frame_reward += reward
-                
+          
                 # fill the next frame history
                 next_frame_history[:, :, :, i] = preprocess(next_frame)
+
             
 
             # 1, 2, 3, 4 <- 0, 1, 2, 3
@@ -401,6 +398,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
         # total time in seconds
         time_elapsed = end_episode_time - start_time
 
+        # calculate the total and average reward
         total_reward = np.sum(rewards)
         avg_reward_per_episode = total_reward / (total_episodes_elapsed+1)
       
@@ -438,13 +436,16 @@ def main():
     input_space = env.observation_space.shape[0]
     
     # create a new 3 dimensional space for a downscaled grayscale image
-    agent_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']], dtype=np.uint8)
+    agent_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
     
     if hp['DISCRETE_FRAMING']:
-        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']], dtype=np.uint8)
+        # create a new 3 dimensional space for a downscaled grayscale image, default: (64, 64, 4)
+        # uses two discrete memory history frames
+        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
     else:
-        # create a new 3 dimensional space for a downscaled grayscale image
-        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']+1], dtype=np.uint8)
+        # create a new 3 dimensional space for a downscaled grayscale image, default: (64, 64, 5)
+        # uses a sliding memory history frames
+        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']+1])
         
     # print the initial state
     print('AGENT FRAME input:', agent_input_space.shape, 'DISCRETE FRAME SAVING:', hp['DISCRETE_FRAMING'], 
@@ -466,8 +467,10 @@ def main():
     # create a memory for remembering and replay
     memory = ReplayMemory(hp['MEMORY_SIZE'], memory_input_space, action_space)
 
+    """
+    Run the main loop of the game
+    """
     if hp['DISCRETE_FRAMING']:
-        # run the main loop of the game
         run_discrete(agent, target_agent, memory, env, stats, start_time)
 
     else:

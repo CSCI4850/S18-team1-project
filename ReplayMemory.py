@@ -190,7 +190,7 @@ class ReplayMemory:
             model_targets = model.predict(current_states)
             
             # Create targets from argmax(Q(s+1,a+1))
-            # Use the target model!
+            # Use the target model
             targets = reward +  gamma * np.amax(target_model.predict(next_states), axis=1)
             # Absorb the reward on terminal state-action transitions
             targets[lost_lives] = reward[lost_lives]

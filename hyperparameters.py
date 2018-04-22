@@ -11,7 +11,7 @@ hp = {
         'GAME' : 'BreakoutDeterministic-v4', # Name of which game to use
                                              # v1-4 Deterministic or Not
 
-        'DISCRETE_FRAMING' : True,      # 2 discrete sets of frames stored in memory
+        'DISCRETE_FRAMING' : False,      # 2 discrete sets of frames stored in memory
     
         'LOAD_WEIGHTS' : '',           # Loads weights into the model if so desired
                                        # leave '' if starting from a new model
@@ -28,12 +28,12 @@ hp = {
                                        # that many frames.
                                        # default: 4
     
-        'MAX_EPISODES' : 12000,        # defined as how many cycles of full life to end life or
+        'MAX_EPISODES' : 50000,        # defined as how many cycles of full life to end life or
                                        # winning a round
-                                       # default: 2000
-        'MAX_FRAMES' : 1750000,        # defined as how many cycles of full life to end life or
-                                       # winning a round
-                                       # default: 2000
+                                       # default: 12,000
+
+        'MAX_FRAMES' : 50000000,       # max number of frames allowed to pass before stopping
+                                       # default: 50,000,000
 
         'SAVE_MODEL' : 500,            # how many episodes should we go through until we save the model?
                                        # default: whenever
@@ -65,9 +65,9 @@ hp = {
         'GRADIENT_MOMENTUM' : 0.95,    # momentum into the gradient used
                                        # default: 0.95
 
-        'LOSS' : 'logcosh',            # can be 'logcosh' for logarithm of hyperbolic cosine
+        'LOSS' : 'huber',            # can be 'logcosh' for logarithm of hyperbolic cosine
                                        # or 'mse' for mean squared error
-                                       # default: logcosh or mse
+                                       # default: logcosh, mse, or huber
         
         'NO-OP_MAX' : 30,              # how many times no-op can be called in a single episode
                                        # chooses a different action if exceeded
