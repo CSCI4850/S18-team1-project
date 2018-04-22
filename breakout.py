@@ -26,7 +26,7 @@ line_sep = '+-------------------------------------------------------------------
 # use array[0:1,:,:,:]
 # normalize 0-255 -> 0.0-1.0 to reduce exploding gradient
 def normalize_frames(current_frame_history):
-    return np.expand_dims(current_frame_history.astype('float32') / 255., axis = 0)
+    return current_frame_history.astype('float32') / 255.
 
 # reduces the rgb channels to black and white (3 axis to 2 axis),
 # then resizes the (210, 160) to (height, width) default: 84, 84
@@ -69,11 +69,11 @@ def plot_initial_graph(env):
 def init_discrete_frame_skip(past_frames_size, frame):
             
     for i in range(hp['FRAME_SKIP_SIZE']):
-        past_frames_size[:, :, i] = preprocess(frame)
+        past_frames_size[:, :, :, i] = preprocess(frame)
 
 def init_sliding_frame_skip(past_frames_size, frame):     
     for i in range(hp['FRAME_SKIP_SIZE']+1):
-        past_frames_size[:, :, i] = preprocess(frame)
+        past_frames_size[:, :, :, i] = preprocess(frame)
 
     
 
@@ -113,10 +113,10 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
     max_lives = lives = find_max_lives(env)
     
     # current frame history of size 4
-    current_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
+    current_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
     
     # next set of frame history of size 4
-    next_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
+    next_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
 
     # initialize a greedy-e default: 1.0
     e = hp['INIT_EXPLORATION']
@@ -158,7 +158,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
             #    e -= e_step
                 
             # get Q value
-            Q = agent.model.predict(normalize_frames(current_frame_history[:,:,:]))
+            Q = agent.model.predict(normalize_frames(current_frame_history[:, :, :, :]))
             
             # pick an action
             max_Q, action = agent.act(Q, e)
@@ -175,8 +175,8 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
                     e -= e_step
                 
                 # renders each frame
-                #if hp['RENDER_ENV']:
-                #    env.render() 
+                if hp['RENDER_ENV']:
+                    env.render() 
                 
                 # increase actual total frames elapsed
                 total_frames_elapsed += 1
@@ -193,7 +193,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
                 total_frame_reward += reward
                 
                 # fill the next frame history
-                next_frame_history[:,:,i] = preprocess(next_frame)
+                next_frame_history[:, :, :, i] = preprocess(next_frame)
             
             episodic_reward += total_frame_reward
             
@@ -279,13 +279,13 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
     max_lives = lives = find_max_lives(env)
     
     # sliding frame history
-    frame_history = np.zeros([84, 84, 5], dtype=np.uint8)
+    frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']+1])
 
     # current frame history of size 4
-    current_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
+    current_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
     
     # next set of frame history of size 4
-    next_frame_history = np.zeros([84, 84, 4], dtype=np.uint8)
+    next_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
 
     # initialize a greedy-e default: 1.0
     e = hp['INIT_EXPLORATION']
@@ -321,7 +321,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
             total_frame_reward = 0
             
             # get Q value
-            Q = agent.model.predict(normalize_frames(frame_history[:, :, :4]))
+            Q = agent.model.predict(normalize_frames(frame_history[:, :, :, :4]))
             
             # pick an action
             max_Q, action = agent.act(Q, e)
@@ -339,8 +339,8 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                 
 
                 # renders each frame
-                #if hp['RENDER_ENV']:
-                #    env.render() 
+                if hp['RENDER_ENV']:
+                    env.render() 
                 
                 # increase actual total frames elapsed
                 total_frames_elapsed += 1
@@ -357,11 +357,11 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                 total_frame_reward += reward
                 
                 # fill the next frame history
-                next_frame_history[:,:,i] = preprocess(next_frame)
+                next_frame_history[:, :, :, i] = preprocess(next_frame)
             
 
             # 1, 2, 3, 4 <- 0, 1, 2, 3
-            frame_history[:, :, 1:] = next_frame_history
+            frame_history[:, :, :, 1:] = next_frame_history
 
             episodic_reward += total_frame_reward
             
@@ -381,7 +381,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
 
             # 0, 1, 2, 3 <- 1, 2, 3, 4
             # advance the frame history buffer
-            frame_history[:, :, :4] = frame_history[:, :, 1:]
+            frame_history[:, :, :, :4] = frame_history[:, :, :, 1:]
             
             # set new lives
             lives = current_lives

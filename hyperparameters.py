@@ -11,12 +11,12 @@ hp = {
         'GAME' : 'BreakoutDeterministic-v4', # Name of which game to use
                                              # v1-4 Deterministic or Not
 
-        'DISCRETE_FRAMING' : False,      # 2 discrete sets of frames stored in memory
+        'DISCRETE_FRAMING' : True,      # 2 discrete sets of frames stored in memory
     
         'LOAD_WEIGHTS' : '',           # Loads weights into the model if so desired
                                        # leave '' if starting from a new model
 
-        'RENDER_ENV' : True,          # shows the screen of the game as it learns
+        'RENDER_ENV' : False,          # shows the screen of the game as it learns
                                        # massivly slows the training down when True
                                        # default: False
 
