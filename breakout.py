@@ -161,40 +161,34 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
             # increase the total Q value
             total_max_Q.append(max_Q)
 
-            # determine an action every 4 frames
-            for i in range (hp['FRAME_SKIP_SIZE']):
 
-                # e-greedy scaled linearly over time
-                # starts at 1.0 ends at 0.1
-                if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
-                    e -= e_step
-                
-                # renders each frame
-                if hp['RENDER_ENV']:
-                    env.render() 
-                    time.sleep(1)
-                
-                # increase actual total frames elapsed
-                total_frames_elapsed += 1
 
-                # collect the next frame frames, reward, and done flag
-                # and act upon the environment by stepping with some action
-                # increase action 1 to skip no-op and replace with 
-                next_frame, reward, done, info = env.step(action + 1)
+            # e-greedy scaled linearly over time
+            # starts at 1.0 ends at 0.1
+            if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
+                e -= e_step
+            
+            # increase actual total frames elapsed
+            total_frames_elapsed += 1
 
-                # episodic reward
-                total_frame_reward += reward
-                
-                # fill the next frame history
-                next_frame_history[:, :, :, i] = preprocess(next_frame)
+            # collect the next frame frames, reward, and done flag
+            # and act upon the environment by stepping with some action
+            # increase action 1 to skip no-op and replace with 
+            next_frame, reward, done, info = env.step(action + 1)
 
-                # capture how many lives we now have after taking another step
-                # used in place of done in remmeber because an episode is technically
-                # only as long as the agent is alive, speeds up training
-                current_lives = info['ale.lives']
-                # checks whether we have lost a life
-                # used to send that into done rather than waiting until an episode is done
-                died = lives > current_lives
+            # episodic reward
+            total_frame_reward += reward
+            
+            # fill the next frame history
+            next_frame_history[:, :, :, i] = preprocess(next_frame)
+
+            # capture how many lives we now have after taking another step
+            # used in place of done in remmeber because an episode is technically
+            # only as long as the agent is alive, speeds up training
+            current_lives = info['ale.lives']
+            # checks whether we have lost a life
+            # used to send that into done rather than waiting until an episode is done
+            died = lives > current_lives
             
             episodic_reward += total_frame_reward
             
@@ -325,41 +319,38 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
 
             # increase the total Q value
             total_max_Q.append(max_Q)
-
-            # determine an action every 4 frames
-            for i in range (hp['FRAME_SKIP_SIZE']):
                 
-                # e-greedy scaled linearly over time
-                # starts at 1.0 ends at 0.1
-                if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
-                    e -= e_step
-                
+            # e-greedy scaled linearly over time
+            # starts at 1.0 ends at 0.1
+            if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
+                e -= e_step
+            
 
-                # renders each frame
-                if hp['RENDER_ENV']:
-                    env.render() 
-                
-                # increase actual total frames elapsed
-                total_frames_elapsed += 1
+            # renders each frame
+            if hp['RENDER_ENV']:
+                env.render() 
+            
+            # increase actual total frames elapsed
+            total_frames_elapsed += 1
 
-                # collect the next frame frames, reward, and done flag
-                # and act upon the environment by stepping with some action
-                # increase action 1 to skip no-op and replace with 
-                next_frame, reward, done, info = env.step(action + 1)
+            # collect the next frame frames, reward, and done flag
+            # and act upon the environment by stepping with some action
+            # increase action 1 to skip no-op and replace with 
+            next_frame, reward, done, info = env.step(action + 1)
 
-                # episodic reward
-                total_frame_reward += reward
-          
-                # fill the next frame history
-                next_frame_history[:, :, :, i] = preprocess(next_frame)
+            # episodic reward
+            total_frame_reward += reward
+      
+            # fill the next frame history
+            next_frame_history[:, :, :, i] = preprocess(next_frame)
 
-                # capture how many lives we now have after taking another step
-                # used in place of done in remmeber because an episode is technically
-                # only as long as the agent is alive, speeds up training
-                current_lives = info['ale.lives']
-                # checks whether we have lost a life
-                # used to send that into done rather than waiting until an episode is done
-                died = lives > current_lives
+            # capture how many lives we now have after taking another step
+            # used in place of done in remmeber because an episode is technically
+            # only as long as the agent is alive, speeds up training
+            current_lives = info['ale.lives']
+            # checks whether we have lost a life
+            # used to send that into done rather than waiting until an episode is done
+            died = lives > current_lives
 
             # 1, 2, 3, 4 <- 0, 1, 2, 3
             frame_history[:, :, :, 1:hp['FRAME_SKIP_SIZE']+1] = next_frame_history
