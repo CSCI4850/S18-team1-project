@@ -9,7 +9,7 @@ from hyperparameters import *
 # expand dimensions to (1, 84, 84, 5) from (84, 84, 5)
 # normalize 0-255 -> 0-1 to reduce exploding gradient
 def normalize_states(current_frame_history):
-    return np.float64(current_frame_history / 255.)
+    return current_frame_history.astype('float32') / 255.
 
 class ReplayMemory:
     def __init__(self, memory_size, state_size, action_size):
@@ -68,7 +68,7 @@ class ReplayMemory:
         self.lost_life[self.current_index] = lost_life
         
         # offset the current index
-        self.current_index = (self.current_index+1)%self.maxsize
+        self.current_index = (self.current_index + 1) % self.maxsize
         
         # increase the size
         self.size = max(self.current_index,self.size)
@@ -141,7 +141,7 @@ class ReplayMemory:
         self.lost_life[self.current_index] = lost_life
         
         # offset the current index
-        self.current_index = (self.current_index+1)%self.maxsize
+        self.current_index = (self.current_index + 1) % self.maxsize
         
         # increase the size
         self.size = max(self.current_index,self.size)

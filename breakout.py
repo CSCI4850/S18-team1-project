@@ -13,6 +13,8 @@ from hyperparameters import *
 
 from collections import deque
 
+from PIL import Image
+
 from skimage.transform import resize
 from skimage.color import rgb2gray
 from keras.preprocessing import image
@@ -24,16 +26,20 @@ line_sep = '+-------------------------------------------------------------------
 # use array[0:1,:,:,:]
 # normalize 0-255 -> 0.0-1.0 to reduce exploding gradient
 def normalize_frames(current_frame_history):
-    return np.expand_dims(np.float64(current_frame_history / 255.), axis=0)
+    return np.expand_dims(current_frame_history.astype('float32') / 255., axis = 0)
 
 # reduces the rgb channels to black and white (3 axis to 2 axis),
 # then resizes the (210, 160) to (height, width) default: 84, 84
 # then reduces the np array to 0-255 ints for saving space
 # finally expands the axis 0 dimension by one for saving into the conv net
 def preprocess(img):
-    img = np.uint8(resize(rgb2gray(img), (hp['HEIGHT'], hp['WIDTH']), mode='reflect') * 255)
-    return img
-    #return img.reshape(1,84,84)
+    # resize and grayscape
+    assert img.ndim == 3  # (height, width, channel)
+    img = Image.fromarray(img)
+    img = img.resize((hp['HEIGHT'], hp['WIDTH'])).convert('L')
+    processed_img = np.array(img)
+    assert processed_img.shape == (hp['HEIGHT'], hp['WIDTH'])
+    return processed_img.astype('uint8')
 
 # prints statistics at the end of every episode
 def print_stats(total_episodes_elapsed, total_frames_elapsed, epsilon, 
@@ -152,7 +158,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
             #    e -= e_step
                 
             # get Q value
-            Q = agent.model.predict(normalize_frames(current_frame_history))
+            Q = agent.model.predict(normalize_frames(current_frame_history[:,:,:]))
             
             # pick an action
             max_Q, action = agent.act(Q, e)
@@ -477,7 +483,7 @@ def main():
     print('finished training in', time_elapsed, 'seconds')
 
     # save and quit
-    agent.quit(mean_times, stats)
+    agent.quit(stats)
 
 
 # execute main

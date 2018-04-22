@@ -54,28 +54,33 @@ class DQNAgent():
 
         # without downsample: (210, 160, 3)
         # with downsample: (84, 84, 1)
-        model.add(keras.layers.Conv2D(32, kernel_size = (8,8),
-                                          strides = 4,
-                                          activation = 'relu',
-                                          input_shape = self.input_shape ))
+        model.add(keras.layers.Conv2D(filters = 32, 
+                                      kernel_size = (8,8),
+                                      strides = 4,
+                                      activation = 'relu',
+                                      input_shape = self.input_shape ))
 
         # fed into a lower dimensional convolutional layer
-        model.add(keras.layers.Conv2D(64, kernel_size = (4,4),
-                                          strides = 2, 
-                                          activation = 'relu'))
+        model.add(keras.layers.Conv2D(filters = 64, 
+                                      kernel_size = (4,4),
+                                      strides = 2, 
+                                      activation = 'relu'))
 
         # fed into a lower dimensional convolutional layer
-        model.add(keras.layers.Conv2D(64, kernel_size = (3,3),
-                                          strides = 1,
-                                          activation = 'relu'))
+        model.add(keras.layers.Conv2D(filters = 64,
+                                      kernel_size = (3,3),
+                                      strides = 1,
+                                      activation = 'relu'))
 
         model.add(keras.layers.Flatten())
 
         # dense layer 512
-        model.add(keras.layers.Dense(512, activation = 'relu'))
+        model.add(keras.layers.Dense(units = 512, 
+                                     activation = 'relu'))
 
         # classify with softmax into a category
-        model.add(keras.layers.Dense(self.action_space, activation = 'linear'))
+        model.add(keras.layers.Dense(units = self.action_space, 
+                                     activation = 'linear'))
 
         # try mse, mean squared error or logcosh, log of hyperbolic cosine
         model.compile(
@@ -84,14 +89,14 @@ class DQNAgent():
                     else keras.losses.mse    if hp['LOSS'] is 'mse'
                     else keras.losses.logcosh,
                       
-        optimizer = keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
-                                          epsilon=hp['MIN_SQUARED_GRADIENT'],
-                                          beta_1=hp['GRADIENT_MOMENTUM']) if hp['OPTIMIZER'] is 'Adam'
-                    else keras.optimizers.RMSprop(lr=hp['LEARNING_RATE'],
-                                                  epsilon=hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
+        optimizer = keras.optimizers.Adam(lr = hp['LEARNING_RATE'], 
+                                          epsilon = hp['MIN_SQUARED_GRADIENT'],
+                                          beta_1 = hp['GRADIENT_MOMENTUM']) if hp['OPTIMIZER'] is 'Adam'
+                    else keras.optimizers.RMSprop(lr = hp['LEARNING_RATE'],
+                                                  epsilon = hp['MIN_SQUARED_GRADIENT']) if hp['OPTIMIZER'] is 'RMSProp'
                     
-                    else keras.optimizers.Adam(lr=hp['LEARNING_RATE'], 
-                                          epsilon=hp['MIN_SQUARED_GRADIENT']), 
+                    else keras.optimizers.Adam(lr = hp['LEARNING_RATE'], 
+                                          epsilon = hp['MIN_SQUARED_GRADIENT']), 
         metrics = ['accuracy'])
 
         # show summary
