@@ -7,6 +7,9 @@
 Our model consists of a Convolutional Neural Network with a preprocessed frame from Breakout of a (210, 160, 3) tuple => (84, 84) grayscale down-sized frame and a linear output size of 4 (no-op, fire, move left, move right) which gets reduced down to 3 (no-op, move left, move right) because (fire) in breakout is basically a no-op. The model uses the Adam optimizer with a logcosh, mean squared error, or huber loss function.
 
 #### Requirements:
+<b>python3</b>: need help installing? <a href="http://docs.python-guide.org/en/latest/starting/installation/">click here!</a><br>
+<b>pip</b> (python's package manager): need help installing? <a href="https://www.makeuseof.com/tag/install-pip-for-python/">click here!</a><br>
+
     numpy==1.13.3
     scikit_image==0.13.1
     Keras==2.1.3
@@ -16,17 +19,17 @@ Our model consists of a Convolutional Neural Network with a preprocessed frame f
 or just do:
 ```pip install -r requirements.txt```
 
-### Components:
-1. breakout.py:
+### Python Components:
+1. <b>breakout.py</b>:
   The main breakout game loop. Integrates with DQNAgent.py and ReplayMemory.py.
 
-2. DQNAgent.py
+2. <b>DQNAgent.py</b>:
   The Deep Q Network Agent for learning the breakout game.
 
-3. ReplayMemory.py
+3. <b>ReplayMemory.py</b>:
   The Remembering and Replaying for the DQNAgent to learn.
   
-4. hyperparameters.py
+4. <b>hyperparameters.py</b>:
   All of the hyperparameters
   
 #### Breakout Main Loop: 
@@ -119,3 +122,12 @@ To start the breakout game with the DQN Agent, run ```python3 breakout.py```
 <br>
 To change how the DQN Agent learns, modify hyperparameters.py
 
+### References:
+1. http://docs.python-guide.org/en/latest/starting/installation/
+2. https://www.makeuseof.com/tag/install-pip-for-python/
+3. https://storage.googleapis.com/deepmind-media/dqn/DQNNaturePaper.pdf
+4. https://github.com/dennybritz/reinforcement-learning/issues/30
+5. https://github.com/tokb23/dqn/blob/master/dqn.py
+6. https://github.com/jcwleo/Reinforcement_Learning/blob/master/Breakout/Breakout_DQN_class.py
+7. https://medium.com/mlreview/speeding-up-dqn-on-pytorch-solving-pong-in-30-minutes-81a1bd2dff55
+8. https://becominghuman.ai/beat-atari-with-deep-reinforcement-learning-part-2-dqn-improvements-d3563f665a2c
