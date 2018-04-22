@@ -122,3 +122,12 @@ To start the breakout game with the DQN Agent, run ```python3 breakout.py```
 <br>
 To change how the DQN Agent learns, modify hyperparameters.py
 
+### References:
+1. http://docs.python-guide.org/en/latest/starting/installation/
+2. https://www.makeuseof.com/tag/install-pip-for-python/
+3. https://storage.googleapis.com/deepmind-media/dqn/DQNNaturePaper.pdf
+4. https://github.com/dennybritz/reinforcement-learning/issues/30
+5. https://github.com/tokb23/dqn/blob/master/dqn.py
+6. https://github.com/jcwleo/Reinforcement_Learning/blob/master/Breakout/Breakout_DQN_class.py
+7. https://medium.com/mlreview/speeding-up-dqn-on-pytorch-solving-pong-in-30-minutes-81a1bd2dff55
+8. https://becominghuman.ai/beat-atari-with-deep-reinforcement-learning-part-2-dqn-improvements-d3563f665a2c
