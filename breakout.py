@@ -82,7 +82,7 @@ def find_max_lives(env):
     # don't step anywhere, but grab info
     _, _, _, info = env.step(0)
     return info['ale.lives']    # return max lives
-  
+
 
 # main loop, runs everything
 def run_discrete(agent, target_agent, memory, env, stats, start_time):
@@ -172,6 +172,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
                 # renders each frame
                 if hp['RENDER_ENV']:
                     env.render() 
+                    time.sleep(1)
                 
                 # increase actual total frames elapsed
                 total_frames_elapsed += 1
@@ -186,20 +187,20 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
                 
                 # fill the next frame history
                 next_frame_history[:, :, :, i] = preprocess(next_frame)
+
+                # capture how many lives we now have after taking another step
+                # used in place of done in remmeber because an episode is technically
+                # only as long as the agent is alive, speeds up training
+                current_lives = info['ale.lives']
+                # checks whether we have lost a life
+                # used to send that into done rather than waiting until an episode is done
+                died = lives > current_lives
             
             episodic_reward += total_frame_reward
             
             # clip the reward between [-1.0, 1.0]
             clipped_reward = np.clip(episodic_reward, -1.0, 1.0)
             
-            # capture how many lives we now have after taking another step
-            # used in place of done in remmeber because an episode is technically
-            # only as long as the agent is alive, speeds up training
-            current_lives = info['ale.lives']
-            # checks whether we have lost a life
-            # used to send that into done rather than waiting until an episode is done
-            died = lives > current_lives
-
             # remember the current and next frame with their actions
             memory.remember_discrete(current_frame_history, action, 
                                      clipped_reward, next_frame_history, died)
@@ -352,7 +353,13 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                 # fill the next frame history
                 next_frame_history[:, :, :, i] = preprocess(next_frame)
 
-            
+                # capture how many lives we now have after taking another step
+                # used in place of done in remmeber because an episode is technically
+                # only as long as the agent is alive, speeds up training
+                current_lives = info['ale.lives']
+                # checks whether we have lost a life
+                # used to send that into done rather than waiting until an episode is done
+                died = lives > current_lives
 
             # 1, 2, 3, 4 <- 0, 1, 2, 3
             frame_history[:, :, :, 1:hp['FRAME_SKIP_SIZE']+1] = next_frame_history
@@ -361,14 +368,6 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
             
             # clip the reward between [-1, 1]
             clipped_reward = np.clip(episodic_reward, -1.0, 1.0)
-            
-            # capture how many lives we now have after taking another step
-            # used in place of done in remmeber because an episode is technically
-            # only as long as the agent is alive, speeds up training
-            current_lives = info['ale.lives']
-            # checks whether we have lost a life
-            # used to send that into done rather than waiting until an episode is done
-            died = lives > current_lives
 
             # remember the current and next frame with their actions
             memory.remember_frame_sliding(frame_history, action, clipped_reward, died)
