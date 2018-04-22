@@ -11,7 +11,7 @@ hp = {
         'GAME' : 'BreakoutDeterministic-v4', # Name of which game to use
                                              # v1-4 Deterministic or Not
 
-        'DISCRETE_FRAMING' : False,      # 2 discrete sets of frames stored in memory
+        'DISCRETE_FRAMING' : True,      # 2 discrete sets of frames stored in memory
     
         'LOAD_WEIGHTS' : '',           # Loads weights into the model if so desired
                                        # leave '' if starting from a new model
@@ -65,8 +65,9 @@ hp = {
         'GRADIENT_MOMENTUM' : 0.95,    # momentum into the gradient used
                                        # default: 0.95
 
-        'LOSS' : 'huber',            # can be 'logcosh' for logarithm of hyperbolic cosine
+        'LOSS' : 'huber',              # can be 'logcosh' for logarithm of hyperbolic cosine
                                        # or 'mse' for mean squared error
+                                       # or 'huber' for huber loss
                                        # default: logcosh, mse, or huber
         
         'NO-OP_MAX' : 30,              # how many times no-op can be called in a single episode

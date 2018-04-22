@@ -175,7 +175,7 @@ class ReplayMemory:
             # Slice memory into training sample
             # current state is frames [0, 1, 2, 3]
             # and normalize states [0,1] instead of 0-255
-            current_states = normalize_states(self.states[current_sample, :, :, :4])
+            current_states = normalize_states(self.states[current_sample, :, :, :hp['FRAME_SKIP_SIZE']])
 
             # next_state is frames [1, 2, 3, 4]
             # and normalize states [0,1] instead of 0-255
