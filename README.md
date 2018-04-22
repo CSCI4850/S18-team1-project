@@ -7,8 +7,8 @@
 Our model consists of a Convolutional Neural Network with a preprocessed frame from Breakout of a (210, 160, 3) tuple => (84, 84) grayscale down-sized frame and a linear output size of 4 (no-op, fire, move left, move right) which gets reduced down to 3 (no-op, move left, move right) because (fire) in breakout is basically a no-op. The model uses the Adam optimizer with a logcosh, mean squared error, or huber loss function.
 
 #### Requirements:
-python3: need help installing? <a href="http://docs.python-guide.org/en/latest/starting/installation/">click here!</a><br>
-pip (python's package manager): need help installing? <a href="https://www.makeuseof.com/tag/install-pip-for-python/">click here!</a><br>
+<b>python3</b>: need help installing? <a href="http://docs.python-guide.org/en/latest/starting/installation/">click here!</a><br>
+<b>pip</b> (python's package manager): need help installing? <a href="https://www.makeuseof.com/tag/install-pip-for-python/">click here!</a><br>
 
     numpy==1.13.3
     scikit_image==0.13.1
@@ -20,16 +20,16 @@ or just do:
 ```pip install -r requirements.txt```
 
 ### Python Components:
-1. breakout.py:
+1. <b>breakout.py</b>:
   The main breakout game loop. Integrates with DQNAgent.py and ReplayMemory.py.
 
-2. DQNAgent.py
+2. <b>DQNAgent.py</b>:
   The Deep Q Network Agent for learning the breakout game.
 
-3. ReplayMemory.py
+3. <b>ReplayMemory.py</b>:
   The Remembering and Replaying for the DQNAgent to learn.
   
-4. hyperparameters.py
+4. <b>hyperparameters.py</b>:
   All of the hyperparameters
   
 #### Breakout Main Loop: 
