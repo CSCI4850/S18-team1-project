@@ -66,8 +66,7 @@ def plot_initial_graph(env):
 # initializes the beginning of an episode by loading the first frame
 # however big the frame skip size is default: 4
 # into a historical frame buffer
-def init_discrete_frame_skip(past_frames_size, frame):
-            
+def init_discrete_frame_skip(past_frames_size, frame):         
     for i in range(hp['FRAME_SKIP_SIZE']):
         past_frames_size[:, :, :, i] = preprocess(frame)
 
@@ -93,7 +92,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
     # flag for whether we die or win a round
     done = False
     
-    total_frame_reward = episodic_reward = 0
+    this_life_reward = total_frame_reward = episodic_reward = 0
 
     # total frames: total number of frames elapsed
     # a frame is one instance of each tick of the clock of the game
@@ -140,7 +139,8 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
         
         # do nothing for some amount of the initial game
         # makes new episodes slightly different from each other
-        for _ in range(random.randint(1, hp['NO-OP_MAX'])):
+        noop = random.randint(1, hp['NO-OP_MAX'])
+        for _ in range(noop):
             current_frame, _, _, _ = env.step(0) # do nothing
         
         # set up the current and next frame with the first frame of the game
@@ -188,9 +188,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
                 next_frame_history[:, :, :, i] = preprocess(next_frame)
             
             episodic_reward += total_frame_reward
-            
-            # clip the reward between [-1.0, 1.0]
-            clipped_reward = np.clip(episodic_reward, -1.0, 1.0)
+            this_life_reward += total_frame_reward
             
             # capture how many lives we now have after taking another step
             # used in place of done in remmeber because an episode is technically
@@ -198,7 +196,14 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
             current_lives = info['ale.lives']
             # checks whether we have lost a life
             # used to send that into done rather than waiting until an episode is done
-            died = lives > current_lives
+            if lives > current_lives:
+                died = 1
+                this_life_reward = 0
+            else:
+                died = 0
+
+            # clip the reward between [-1.0, 1.0]
+            clipped_reward = np.clip(this_life_reward, -1.0, 1.0)
 
             # remember the current and next frame with their actions
             memory.remember_discrete(current_frame_history, action, 
@@ -333,7 +338,6 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                 if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
                     e -= e_step
                 
-
                 # renders each frame
                 if hp['RENDER_ENV']:
                     env.render() 
@@ -358,9 +362,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
             frame_history[:, :, :, 1:hp['FRAME_SKIP_SIZE']+1] = next_frame_history
 
             episodic_reward += total_frame_reward
-            
-            # clip the reward between [-1, 1]
-            clipped_reward = np.clip(episodic_reward, -1.0, 1.0)
+            this_life_reward += total_frame_reward
             
             # capture how many lives we now have after taking another step
             # used in place of done in remmeber because an episode is technically
@@ -368,7 +370,15 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
             current_lives = info['ale.lives']
             # checks whether we have lost a life
             # used to send that into done rather than waiting until an episode is done
-            died = lives > current_lives
+            if lives > current_lives:
+                died = 1
+                this_life_reward = 0
+            else:
+                died = 0
+
+            # clip the reward between [-1.0, 1.0]
+            clipped_reward = np.clip(this_life_reward, -1.0, 1.0)
+
 
             # remember the current and next frame with their actions
             memory.remember_frame_sliding(frame_history, action, clipped_reward, died)
