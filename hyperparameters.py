@@ -8,7 +8,7 @@ hp = {
         ### hyper parameters for the Main Game Loop ###
         ###-----------------------------------------###
     
-        'GAME' : 'BreakoutDeterminitic-v4',   # Name of which game to use
+        'GAME' : 'BreakoutDeterministic-v4',   # Name of which game to use
                                              # v1-4 Deterministic or NoFrameskip 
 
         'DISCRETE_FRAMING' : False,      # 2 discrete sets of frames stored in memory

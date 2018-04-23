@@ -112,7 +112,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
                 episodic_reward += reward
                 
                 # fill the next frame history
-                next_frame_history[:, :, :, hp['FRAME_BATCH_SIZE']] = preprocess(next_frame)
+                next_frame_history[:, :, :, hp['FRAME_BATCH_SIZE']-1] = preprocess(next_frame)
 
                 # capture how many lives we now have after taking another step
                 # used in place of done in remmeber because an episode is technically

@@ -47,12 +47,6 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
     # sliding frame history
     frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']+1])
 
-    # current frame history of size 4
-    current_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']])
-    
-    # next set of frame history of size 4
-    next_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']])
-
     # initialize a greedy-e default: 1.0
     e = hp['INIT_EXPLORATION']
     
@@ -117,9 +111,6 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                 total_episodic_reward += reward 
                 episodic_reward += reward
 
-                # fill the next frame history
-                next_frame_history[:, :, :, hp['FRAME_BATCH_SIZE']-1] = preprocess(next_frame)
-
                 # capture how many lives we now have after taking another step
                 # used in place of done in remmeber because an episode is technically
                 # only as long as the agent is alive, speeds up training
@@ -133,7 +124,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                     died = 0
 
                 # 1, 2, 3, 4 <- 0, 1, 2, 3
-                frame_history[:, :, :, 1:hp['FRAME_BATCH_SIZE']+1] = next_frame_history
+                frame_history[:, :, :, hp['FRAME_BATCH_SIZE']] = preprocess(next_frame)
 
                 # clip the reward between [-1, 1]
                 clipped_reward = np.clip(episodic_reward, -1.0, 1.0)
