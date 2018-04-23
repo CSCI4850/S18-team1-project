@@ -25,7 +25,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
     # flag for whether we die or win a round
     done = False
     
-    total_frame_reward = episodic_reward = 0
+    total_episodic_reward = episodic_reward = 0
 
     # total frames: total number of frames elapsed
     # a frame is one instance of each tick of the clock of the game
@@ -45,13 +45,13 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
     max_lives = lives = find_max_lives(env)
     
     # sliding frame history
-    frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']+1])
+    frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']+1])
 
     # current frame history of size 4
-    current_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
+    current_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']])
     
     # next set of frame history of size 4
-    next_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
+    next_frame_history = np.zeros([1, hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']])
 
     # initialize a greedy-e default: 1.0
     e = hp['INIT_EXPLORATION']
@@ -70,7 +70,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                 current_frame = env.reset()     # reset the game
                 lives = max_lives     # reset the number of lives we have
                 episodic_reward = 0   # reset the episodic reward
-                episodic_frame = 0    # reset the episodic frames
+                total_episodic_reward = 0
                 done = False          # reset the done flag
             
             # do nothing for some amount of the initial game
@@ -83,11 +83,9 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
 
             # while the episode is not done,
             while not done:
-                
-                total_frame_reward = 0
-                
+                                
                 # get Q value from this state, [0, 1, 2, 3]
-                Q = agent.model.predict(normalize_frames(frame_history[:, :, :, 0:hp['FRAME_SKIP_SIZE']]))
+                Q = agent.model.predict(normalize_frames(frame_history[:, :, :, 0:hp['FRAME_BATCH_SIZE']]))
                 
                 # pick an action
                 max_Q, action = agent.act(Q, e)
@@ -96,45 +94,47 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                 total_max_Q.append(max_Q)
 
                 # determine an action every 4 frames
-                for i in range (hp['FRAME_SKIP_SIZE']):
+                # for i in range (hp['FRAME_SKIP_SIZE']):
                     
-                    # e-greedy scaled linearly over time
-                    # starts at 1.0 ends at 0.1
-                    if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
-                        e -= e_step
-                    
+                # e-greedy scaled linearly over time
+                # starts at 1.0 ends at 0.1
+                if e > hp['MIN_EXPLORATION'] and total_frames_elapsed < hp['EXPLORATION']:
+                    e -= e_step
+                
+                # renders each frame
+                if hp['RENDER_ENV']:
+                    env.render() 
+        
+                # collect the next frame frames, reward, and done flag
+                # and act upon the environment by stepping with some action
+                # increase action 1 to skip no-op and replace with 
+                next_frame, reward, done, info = env.step(action + 1)
 
-                    # renders each frame
-                    if hp['RENDER_ENV']:
-                        env.render() 
-                    
-                    # increase actual total frames elapsed
-                    total_frames_elapsed += 1
+                # increase actual total frames elapsed
+                total_frames_elapsed += 1
 
-                    # collect the next frame frames, reward, and done flag
-                    # and act upon the environment by stepping with some action
-                    # increase action 1 to skip no-op and replace with 
-                    next_frame, reward, done, info = env.step(action + 1)
+                # increase episodic reward
+                total_episodic_reward += reward 
+                episodic_reward += reward
 
-                    # episodic reward
-                    total_frame_reward += reward
-              
-                    # fill the next frame history
-                    next_frame_history[:, :, :, i] = preprocess(next_frame)
+                # fill the next frame history
+                next_frame_history[:, :, :, hp['FRAME_BATCH_SIZE']-1] = preprocess(next_frame)
 
-                    # capture how many lives we now have after taking another step
-                    # used in place of done in remmeber because an episode is technically
-                    # only as long as the agent is alive, speeds up training
-                    current_lives = info['ale.lives']
-                    # checks whether we have lost a life
-                    # used to send that into done rather than waiting until an episode is done
-                    died = lives > current_lives
+                # capture how many lives we now have after taking another step
+                # used in place of done in remmeber because an episode is technically
+                # only as long as the agent is alive, speeds up training
+                current_lives = info['ale.lives']
+                # checks whether we have lost a life
+                # used to send that into done rather than waiting until an episode is done
+                if lives > current_lives:
+                    died = 1
+                    episodic_reward = 0
+                else:
+                    died = 0
 
                 # 1, 2, 3, 4 <- 0, 1, 2, 3
-                frame_history[:, :, :, 1:hp['FRAME_SKIP_SIZE']+1] = next_frame_history
+                frame_history[:, :, :, 1:hp['FRAME_BATCH_SIZE']+1] = next_frame_history
 
-                episodic_reward += total_frame_reward
-                
                 # clip the reward between [-1, 1]
                 clipped_reward = np.clip(episodic_reward, -1.0, 1.0)
 
@@ -143,7 +143,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
 
                 # 0, 1, 2, 3 <- 1, 2, 3, 4
                 # advance the frame history buffer
-                frame_history[:, :, :, 0:hp['FRAME_SKIP_SIZE']] = frame_history[:, :, :, 1:hp['FRAME_SKIP_SIZE']+1]
+                frame_history[:, :, :, 0:hp['FRAME_BATCH_SIZE']] = frame_history[:, :, :, 1:hp['FRAME_BATCH_SIZE']+1]
                 
                 # set new lives
                 lives = current_lives
@@ -157,7 +157,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
                         target_agent.target_update(agent.model)
 
             # have a running total
-            rewards[total_episodes_elapsed] = episodic_reward
+            rewards[total_episodes_elapsed] = total_episodic_reward
                 
             # end time of the program
             end_episode_time = time.time()
@@ -173,7 +173,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
             # record stats
             episode_stats = [total_episodes_elapsed, 
                              total_frames_elapsed, 
-                             episodic_reward, 
+                             total_episodic_reward, 
                              total_reward, 
                              avg_reward_per_episode, 
                              np.mean(total_max_Q)]
@@ -184,7 +184,7 @@ def run_frame_sliding(agent, target_agent, memory, env, stats, start_time):
             print_stats(total_episodes_elapsed, 
                         total_frames_elapsed, 
                         e, 
-                        episodic_reward, 
+                        total_episodic_reward, 
                         total_reward, 
                         avg_reward_per_episode, 
                         np.mean(total_max_Q), 

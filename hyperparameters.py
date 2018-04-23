@@ -8,15 +8,15 @@ hp = {
         ### hyper parameters for the Main Game Loop ###
         ###-----------------------------------------###
     
-        'GAME' : 'BreakoutNoFrameskip-v4',   # Name of which game to use
-                                             # v1-4 Deterministic or Not, frameskip or not
+        'GAME' : 'BreakoutDeterminitic-v4',   # Name of which game to use
+                                             # v1-4 Deterministic or NoFrameskip 
 
-        'DISCRETE_FRAMING' : True,      # 2 discrete sets of frames stored in memory
+        'DISCRETE_FRAMING' : False,      # 2 discrete sets of frames stored in memory
     
         'LOAD_WEIGHTS' : '',           # Loads weights into the model if so desired
                                        # leave '' if starting from a new model
 
-        'RENDER_ENV' : False,          # shows the screen of the game as it learns
+        'RENDER_ENV' : True,          # shows the screen of the game as it learns
                                        # massivly slows the training down when True
                                        # default: False
 
@@ -24,8 +24,11 @@ hp = {
         'WIDTH'  : 84,                 # and width in pixels that the game window will get downscaled to
                                        # defaults: 84, 84
 
-        'FRAME_SKIP_SIZE' : 4,         # how many frames we skip and and how many times we choose an action for
-                                       # that many frames.
+        'FRAME_BATCH_SIZE' : 4,         # how many frames we skip and and how many times we choose an action for
+                                       # that many frames. (taken out for now)
+                                       # default: 4
+
+        'FRAME_BATCH_SIZE' : 4,        # number of frames we're going to batch together into memory
                                        # default: 4
     
         'MAX_EPISODES' : 50000,        # defined as how many cycles of full life to end life or

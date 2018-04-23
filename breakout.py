@@ -15,9 +15,6 @@ from discrete_frames import *
 from sliding_frames import *
 
 
-
-from collections import deque
-
 from PIL import Image
 
 from skimage.transform import resize
@@ -47,16 +44,16 @@ def main():
     input_space = env.observation_space.shape[0]
     
     # create a new 3 dimensional space for a downscaled grayscale image
-    agent_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
+    agent_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']])
     
     if hp['DISCRETE_FRAMING']:
         # create a new 3 dimensional space for a downscaled grayscale image, default: (64, 64, 4)
         # uses two discrete memory history frames
-        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']])
+        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']])
     else:
         # create a new 3 dimensional space for a downscaled grayscale image, default: (64, 64, 5)
         # uses a sliding memory history frames
-        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_SKIP_SIZE']+1])
+        memory_input_space = np.array([hp['HEIGHT'], hp['WIDTH'], hp['FRAME_BATCH_SIZE']+1])
         
     # print the initial state
     print('AGENT FRAME input:', agent_input_space.shape, 'DISCRETE FRAME SAVING:', hp['DISCRETE_FRAMING'], 

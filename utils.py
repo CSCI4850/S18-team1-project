@@ -57,11 +57,11 @@ def plot_initial_graph(env):
 # into a historical frame buffer
 def init_discrete_frame_skip(past_frames_size, frame):
             
-    for i in range(hp['FRAME_SKIP_SIZE']):
+    for i in range(hp['FRAME_BATCH_SIZE']):
         past_frames_size[:, :, :, i] = preprocess(frame)
 
 def init_sliding_frame_skip(past_frames_size, frame):     
-    for i in range(hp['FRAME_SKIP_SIZE']+1):
+    for i in range(hp['FRAME_BATCH_SIZE']+1):
         past_frames_size[:, :, :, i] = preprocess(frame)
 
     
