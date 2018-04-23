@@ -22,6 +22,8 @@ from keras import backend as K
 
 # Note: pass in_keras=False to use this function with raw numbers of numpy arrays for testing
 # https://becominghuman.ai/beat-atari-with-deep-reinforcement-learning-part-2-dqn-improvements-d3563f665a2c
+# https://en.wikipedia.org/wiki/Huber_loss and
+# https://medium.com/@karpathy/yes-you-should-understand-backprop-e2f06eab496b
 def huber_loss(a, b, in_keras=True):
     error = a - b
     quadratic_term = error*error / 2

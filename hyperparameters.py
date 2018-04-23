@@ -16,7 +16,7 @@ hp = {
         'LOAD_WEIGHTS' : '',           # Loads weights into the model if so desired
                                        # leave '' if starting from a new model
 
-        'RENDER_ENV' : True,          # shows the screen of the game as it learns
+        'RENDER_ENV' : False,          # shows the screen of the game as it learns
                                        # massivly slows the training down when True
                                        # default: False
 
