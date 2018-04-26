@@ -24,11 +24,8 @@ hp = {
         'WIDTH'  : 84,                 # and width in pixels that the game window will get downscaled to
                                        # defaults: 84, 84
 
-        'FRAME_BATCH_SIZE' : 4,         # how many frames we skip and and how many times we choose an action for
+        'FRAME_BATCH_SIZE' : 4,        # how many frames we skip and and how many times we choose an action for
                                        # that many frames. (taken out for now)
-                                       # default: 4
-
-        'FRAME_BATCH_SIZE' : 4,        # number of frames we're going to batch together into memory
                                        # default: 4
     
         'MAX_EPISODES' : 50000,        # defined as how many cycles of full life to end life or
