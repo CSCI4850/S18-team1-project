@@ -167,18 +167,18 @@ class DQNAgent():
         
         if hp['DISCRETE_FRAMING']:
             # saving stats
-            with open('stats/' + time + '_discrete_stats.data', 'wb') as f:
+            with open('../stats/' + time + '_discrete_stats.data', 'wb') as f:
                 pickle.dump(stats, f)
         else:
             # saving stats
-            with open('stats/' + time + '_stats.data', 'wb') as f:
+            with open('../stats/' + time + '_stats.data', 'wb') as f:
                 pickle.dump(stats, f)
 
     # load the weights for the game from previous runs
     # Input: filename input
     # Output: None
     def load_weights(self, name):
-        name = 'weights/' + name
+        name = '../weights/' + name
         print('Loading weights from: ', name)
         self.model.load_weights(name)
 
@@ -189,11 +189,11 @@ class DQNAgent():
         
         if hp['DISCRETE_FRAMING']:
             # set the file name
-            fn = 'weights/breakout-v4-weights-D-' + \
+            fn = '../weights/breakout-v4-weights-D-' + \
             str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
         else:
             # set the file name
-            fn = 'weights/breakout-v4-weights-' + \
+            fn = '../weights/breakout-v4-weights-' + \
             str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
      
         print('Saving weights as: ', fn)
