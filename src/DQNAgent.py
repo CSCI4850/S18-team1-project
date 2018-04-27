@@ -191,15 +191,14 @@ class DQNAgent():
             # set the file name
             fn = '../weights/breakout-v4-weights-D-' + \
             str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
+            print('Saving weights as: ', fn)
+            self.model.save_weights(fn)
         else:
             # set the file name
             fn = '../weights/breakout-v4-weights-' + \
             str(datetime.datetime.now().strftime("%y-%m-%d-%H-%M")) + '.h5'
-     
-        print('Saving weights as: ', fn)
-        if hp['DISCRETE_FRAMING']:
+            print('Saving weights as: ', fn)
             self.model.save_weights(fn)
-
 
     # updates the target model
     # Input:  Q model
