@@ -1,7 +1,7 @@
 <h1>Neocognitron Group</hi>
 
 ## Breakout Atari Agent
-<img src="https://github.com/CSCI4850/S18-team1-project/blob/master/breakout.gif">
+<img src="https://github.com/CSCI4850/S18-team1-project/blob/master/breakout.gif" width="200px" height="auto">
 
 ### Model:
 Our model consists of a Convolutional Neural Network with a preprocessed frame from Breakout of a (210, 160, 3) tuple => (84, 84) grayscale down-sized frame and a linear output size of 4 (no-op, fire, move left, move right) which gets reduced down to 3 (no-op, move left, move right) because (fire) in breakout is basically a no-op. The model uses the Adam optimizer with a logcosh, mean squared error, or huber loss function.
