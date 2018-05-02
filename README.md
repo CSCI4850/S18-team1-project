@@ -19,9 +19,9 @@ Our model consists of a Convolutional Neural Network with a preprocessed frame f
 or just do:
 ```pip install -r requirements.txt```
 
-### Python Components:
+### Python Components (located in src):
 1. <b>breakout.py</b>:
-  The main breakout game loop. Integrates with DQNAgent.py and ReplayMemory.py.
+  The main breakout game loop. Integrates with all of the components.
 
 2. <b>DQNAgent.py</b>:
   The Deep Q Network Agent for learning the breakout game.
@@ -32,6 +32,14 @@ or just do:
 4. <b>hyperparameters.py</b>:
   All of the hyperparameters
   
+5. <b>discrete_frames.py</b>:
+    Discrete frames into the model and memory. More memory footprint, more backpropogation steps.
+
+6. <b>sliding_frames.py</b>:
+    Sliding frames into the model and memory. Less memory footprint, less backpropagation steps.
+    
+7 <b>utils.py</b>:
+    List of utility functions used by numerous components.
 #### Breakout Main Loop: 
     'GAME' : 'BreakoutDeterministic-v4', # Name of which game to use
                                          # v1-4 Deterministic or Not
@@ -121,6 +129,11 @@ or just do:
 To start the breakout game with the DQN Agent, run ```python3 breakout.py```
 <br>
 To change how the DQN Agent learns, modify hyperparameters.py
+
+### Demo (located in demo):
+The demo consists of a short python notebook under DQN_Testing.ipynb, it renders every 6 frames.
+<br>
+The other component is a python script that renders each frame as it plays with a specified weight.
 
 ### References:
 1. http://docs.python-guide.org/en/latest/starting/installation/
