@@ -69,16 +69,20 @@ for i in range(WINDOW_LENGTH):
     
 done = False
 iteration = 0
-while not done:
-    action = np.argmax(model.predict(frames))
-    # Eps-soft?
-    if np.random.random() < 0.0:
-        action = np.random.randint(env.action_space.n)
-    observation,reward,finished,_ = env.step(action)
-    done = done or finished
-    myframe = processor.process_state_batch(processor.process_observation(observation))
-    frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
-    frames[:,WINDOW_LENGTH-1,:,:] = myframe
-    iteration += 1
-    
-    env.render()
+
+try:
+    while not done:
+        action = np.argmax(model.predict(frames))
+        # Eps-soft?
+        if np.random.random() < 0.0:
+            action = np.random.randint(env.action_space.n)
+        observation,reward,finished,_ = env.step(action)
+        #done = done or finished
+        myframe = processor.process_state_batch(processor.process_observation(observation))
+        frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
+        frames[:,WINDOW_LENGTH-1,:,:] = myframe
+        iteration += 1
+        print(iteration)
+        env.render()
+except KeyboardInterrupt:
+    print('\nTesting stopped') 
