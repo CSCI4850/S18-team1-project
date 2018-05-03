@@ -53,6 +53,9 @@ env.seed(18)
 processor = AtariProcessor()
 nb_actions = env.action_space.n-1
 
+# open file for reward and seed output data
+f = open("seed_rewards.out", "ab", 0)
+
 
 # #### Building the Model:
 # Next, we build our model. We use the same model that was described by Mnih et al. (2015).
@@ -81,6 +84,7 @@ model.add(Dense(nb_actions))
 model.add(Activation('linear'))
 model.compile(loss='mse',optimizer=Adam(lr=0.00025))
 
+
 # #### Loading the weights that you want!
 weights_filename = 'breakout-v4-weights-18-04-27-18-28.h5'
 model.load_weights(weights_filename)
@@ -104,9 +108,7 @@ for i_episode in range(int(sys.argv[1]), int(sys.argv[2])):
     # initializers
     done = False
     while not done:
-        # env.render()
         action = np.argmax(model.predict(frames))
-        # sleep(.05)
 
         modified_action = action+1
         observation,reward,done,info = env.step(modified_action)
@@ -118,7 +120,12 @@ for i_episode in range(int(sys.argv[1]), int(sys.argv[2])):
         frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
         frames[:,WINDOW_LENGTH-1,:,:] = myframe
 
+        # if frame begins new life, perform fire action to restart game
         if lives != info['ale.lives']:
             lives = info['ale.lives']
             observation,reward,done,info = env.step(1)
-    print("total reward = ", total_reward, "- seed = ", i_episode)
+
+    # output results to stdout and file
+    output = "total reward = " + str(total_reward) + " - seed = " + str(i_episode)
+    print(output)
+    f.write(bytes(output + "\n", 'utf-8'))
