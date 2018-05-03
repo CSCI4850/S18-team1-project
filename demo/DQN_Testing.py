@@ -48,7 +48,8 @@ class AtariProcessor():
 
 
 def demo():
-    seeds = [2270, 2095, 274, 1770, 263, 2204, 1115, 403]
+    seeds = [2270, 2095, 274, 1770, 263, 2204, 1115]
+    seeds.reverse()
     try:
         for i in range(len(seeds)):
             lives = 5
