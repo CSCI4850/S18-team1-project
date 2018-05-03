@@ -73,7 +73,6 @@ def demo():
 
             modified_action = action+1
             observation,reward,done,info = env.step(modified_action)
-            total_reward += reward
 
             myframe = processor.process_state_batch(processor.process_observation(observation))
 
