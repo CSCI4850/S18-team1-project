@@ -1,14 +1,8 @@
-
-# coding: utf-8
-
 # ## Project Demo
 # Just run through these to watch breakout run! We handle processing the frame input and rewards. We then make the environment and model then run the demo.
 
+
 # #### Imports as needed:
-
-# In[1]:
-
-
 from PIL import Image
 import numpy as np
 import gym
@@ -21,13 +15,11 @@ import keras.backend as K
 import matplotlib.pyplot as plt
 from IPython.display import display
 from IPython.display import clear_output
+
 from time import sleep
 
+
 # #### Global Variables:
-
-# In[2]:
-
-
 # height and width
 INPUT_SHAPE = (84, 84)
 # frames used together to input (channels) into the convolutional model
@@ -35,10 +27,6 @@ WINDOW_LENGTH = 4
 
 
 # #### Atari Processor class for processing observations and rewards:
-
-# In[3]:
-
-
 class AtariProcessor():
     """
     Atari Processor for processing
@@ -63,10 +51,6 @@ class AtariProcessor():
 
 
 # #### Gym Environment set up:
-
-# In[4]:
-
-
 env = gym.make('BreakoutDeterministic-v4')
 processor = AtariProcessor()
 nb_actions = env.action_space.n-1
