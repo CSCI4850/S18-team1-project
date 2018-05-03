@@ -49,6 +49,7 @@ class AtariProcessor():
 
 # #### Gym Environment set up:
 env = gym.make('BreakoutDeterministic-v4')
+env.seed(1)
 processor = AtariProcessor()
 nb_actions = env.action_space.n-1
 print('Modified Number of Actions:', nb_actions)
