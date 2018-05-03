@@ -21,6 +21,7 @@ import keras.backend as K
 import matplotlib.pyplot as plt
 from IPython.display import display
 from IPython.display import clear_output
+from time import sleep
 
 # #### Global Variables:
 
@@ -132,9 +133,11 @@ iteration = 0
 
 for i_episode in range(20):
     observation = env.reset()
-    for t in range(100):
+    while not done:
         env.render()
         action = np.argmax(model.predict(frames))
+        env.render()
+        sleep(.1)
 
         modified_action = action+1
         observation,reward,done,_ = env.step(modified_action)
@@ -145,9 +148,6 @@ for i_episode in range(20):
         frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
         frames[:,WINDOW_LENGTH-1,:,:] = myframe
         observation, reward, done, info = env.step(action)
-        if done:
-            print("Episode finished after {} timesteps".format(t+1))
-            break
         iteration += 1
 
 
