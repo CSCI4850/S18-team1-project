@@ -47,9 +47,47 @@ class AtariProcessor():
         return processed_batch
 
 
+def demo():
+    seeds = [274, 1770, 263, 1115, 403]
+
+    for i in range(len(seeds)):
+        lives = 5
+        env.seed(seeds[i])
+        # initialize a frame set to 0s
+        frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
+
+        # reset the observation
+        observation = env.reset()
+
+        # process the first observation as an initial frame set
+        myframe = processor.process_state_batch(processor.process_observation(observation))
+        for i in range(WINDOW_LENGTH):
+            frames[:,i,:,:] = myframe
+
+        # initializers
+        done = False
+        while not done:
+            env.render()
+            action = np.argmax(model.predict(frames))
+            sleep(.04)
+
+            modified_action = action+1
+            observation,reward,done,info = env.step(modified_action)
+            total_reward += reward
+
+            myframe = processor.process_state_batch(processor.process_observation(observation))
+
+            # move the frame along
+            frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
+            frames[:,WINDOW_LENGTH-1,:,:] = myframe
+
+            if lives != info['ale.lives']:
+                lives = info['ale.lives']
+                observation,reward,done,info = env.step(1)
+
+
 # #### Gym Environment set up:
-env = gym.make('BreakoutDeterministic-v4')
-env.seed(1)
+env = gym.make('Breakout-v4')
 processor = AtariProcessor()
 nb_actions = env.action_space.n-1
 print('Modified Number of Actions:', nb_actions)
@@ -83,40 +121,9 @@ model.add(Activation('linear'))
 model.compile(loss='mse',optimizer=Adam(lr=0.00025))
 print(model.summary())
 
-
 # #### Loading the weights that you want!
 weights_filename = 'breakout-v4-weights-18-04-27-18-28.h5'
 model.load_weights(weights_filename)
 
-for i_episode in range(1):
-    lives = 5
-    # initialize a frame set to 0s
-    frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
-
-    # reset the observation
-    observation = env.reset()
-
-    # process the first observation as an initial frame set
-    myframe = processor.process_state_batch(processor.process_observation(observation))
-    for i in range(WINDOW_LENGTH):
-        frames[:,i,:,:] = myframe
-
-    # initializers
-    done = False
-    while not done:
-        env.render()
-        action = np.argmax(model.predict(frames))
-        sleep(.05)
-
-        modified_action = action+1
-        observation,reward,done,info = env.step(modified_action)
-
-        myframe = processor.process_state_batch(processor.process_observation(observation))
-
-        # move the frame along
-        frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
-        frames[:,WINDOW_LENGTH-1,:,:] = myframe
-
-        if lives != info['ale.lives']:
-            lives = info['ale.lives']
-            observation,reward,done,info = env.step(1)
+# render initial environment window
+env.render()
