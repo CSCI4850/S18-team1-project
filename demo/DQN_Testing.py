@@ -48,17 +48,13 @@ class AtariProcessor():
 
 
 def demo():
-<<<<<<< HEAD
     seeds = [2095, 274, 1770, 263, 1115, 403]
-=======
-    seeds = [274, 1770, 263, 1115, 403]
     try:
         for i in range(len(seeds)):
             lives = 5
             env.seed(seeds[i])
             # initialize a frame set to 0s
             frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
->>>>>>> origin/master
 
             # reset the observation
             observation = env.reset()
@@ -88,8 +84,8 @@ def demo():
                     lives = info['ale.lives']
                     observation,reward,done,info = env.step(1)
             sleep(3)
-    except KeyboardInterrupt:  
-        print('Testing Ended!') 
+    except KeyboardInterrupt:
+        print('Testing Ended!')
 
 
 # #### Gym Environment set up:
