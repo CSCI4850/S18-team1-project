@@ -46,9 +46,6 @@ class AtariProcessor():
         processed_batch = batch.astype('float32') / 255.
         return processed_batch
 
-    def process_reward(self, reward):
-        return np.clip(reward, -1., 1.)
-
 
 # #### Gym Environment set up:
 env = gym.make('BreakoutDeterministic-v4')
