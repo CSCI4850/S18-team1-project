@@ -108,12 +108,15 @@ for i_episode in range(int(sys.argv[1]), int(sys.argv[2])):
     # initializers
     done = False
     while not done:
+        # get next action from network
         action = np.argmax(model.predict(frames))
 
+        # perform action and save new enviornment state
         modified_action = action+1
         observation,reward,done,info = env.step(modified_action)
         total_reward += reward
 
+        # process raw environment state
         myframe = processor.process_state_batch(processor.process_observation(observation))
 
         # move the frame along
