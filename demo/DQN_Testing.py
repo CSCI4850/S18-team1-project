@@ -87,36 +87,23 @@ print(model.summary())
 
 
 # #### Loading the weights that you want!
-
-# In[6]:
-
-
 weights_filename = 'breakout-v4-weights-18-04-27-18-28.h5'
 model.load_weights(weights_filename)
 
-
-# initialize a frame set to 0s
-frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
-
-# reset the observation
-observation = env.reset()
-
-# process the first observation as an initial frame set
-myframe = processor.process_state_batch(processor.process_observation(observation))
-for i in range(WINDOW_LENGTH):
-    frames[:,i,:,:] = myframe
-
-env.render()
-
-# initializers
-done = False
-iteration = 0
-    # modify the action space by adding one
-
-    # process the frame
-
 for i_episode in range(20):
+    # initialize a frame set to 0s
+    frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
+
+    # reset the observation
     observation = env.reset()
+
+    # process the first observation as an initial frame set
+    myframe = processor.process_state_batch(processor.process_observation(observation))
+    for i in range(WINDOW_LENGTH):
+        frames[:,i,:,:] = myframe
+
+    # initializers
+    done = False
     while not done:
         env.render()
         action = np.argmax(model.predict(frames))
@@ -132,7 +119,3 @@ for i_episode in range(20):
         frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
         frames[:,WINDOW_LENGTH-1,:,:] = myframe
         observation, reward, done, info = env.step(action)
-        iteration += 1
-
-
-# clear_output(wait=True)
