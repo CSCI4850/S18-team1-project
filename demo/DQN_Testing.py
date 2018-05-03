@@ -83,6 +83,7 @@ def demo():
             if lives != info['ale.lives']:
                 lives = info['ale.lives']
                 observation,reward,done,info = env.step(1)
+        sleep(3)
 
 
 # #### Gym Environment set up:
