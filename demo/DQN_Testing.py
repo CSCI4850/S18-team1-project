@@ -119,7 +119,6 @@ model.add(Activation('relu'))
 model.add(Dense(nb_actions))
 model.add(Activation('linear'))
 model.compile(loss='mse',optimizer=Adam(lr=0.00025))
-print(model.summary())
 
 # #### Loading the weights that you want!
 weights_filename = 'breakout-v4-weights-18-04-27-18-28.h5'
@@ -127,3 +126,4 @@ model.load_weights(weights_filename)
 
 # render initial environment window
 env.render()
+demo()
