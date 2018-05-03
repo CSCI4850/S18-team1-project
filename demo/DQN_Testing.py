@@ -88,6 +88,7 @@ weights_filename = 'breakout-v4-weights-18-04-27-18-28.h5'
 model.load_weights(weights_filename)
 
 for i_episode in range(20):
+    lives = 5
     # initialize a frame set to 0s
     frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
 
@@ -104,15 +105,17 @@ for i_episode in range(20):
     while not done:
         env.render()
         action = np.argmax(model.predict(frames))
-        env.render()
-        sleep(.1)
+        sleep(.05)
 
         modified_action = action+1
-        observation,reward,done,_ = env.step(modified_action)
+        observation,reward,done,info = env.step(modified_action)
 
         myframe = processor.process_state_batch(processor.process_observation(observation))
 
         # move the frame along
         frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
         frames[:,WINDOW_LENGTH-1,:,:] = myframe
-        observation, reward, done, info = env.step(action)
+
+        if lives != info['ale.lives']:
+            lives = info['ale.lives']
+            observation,reward,done,info = env.step(1)
