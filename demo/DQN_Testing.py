@@ -88,7 +88,7 @@ print(model.summary())
 weights_filename = 'breakout-v4-weights-18-04-27-18-28.h5'
 model.load_weights(weights_filename)
 
-for i_episode in range(20):
+for i_episode in range(1):
     lives = 5
     # initialize a frame set to 0s
     frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
