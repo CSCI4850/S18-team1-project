@@ -32,7 +32,7 @@ def run_discrete(agent, target_agent, memory, env, stats, start_time):
     total_episodes_elapsed = 0
 
     # total running reward:  all rewards between all episodes
-    rewards = np.zeros([hp['MAX_EPISODES']], dtype=np.uint8)
+    rewards = np.zeros([hp['MAX_EPISODES']], dtype=np.uint16)
 
     # total running Q:  all Q between the next 100 episodes
     total_max_Q = deque(maxlen=100)
