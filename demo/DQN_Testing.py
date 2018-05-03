@@ -48,42 +48,48 @@ class AtariProcessor():
 
 
 def demo():
+<<<<<<< HEAD
     seeds = [2095, 274, 1770, 263, 1115, 403]
+=======
+    seeds = [274, 1770, 263, 1115, 403]
+    try:
+        for i in range(len(seeds)):
+            lives = 5
+            env.seed(seeds[i])
+            # initialize a frame set to 0s
+            frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
+>>>>>>> origin/master
 
-    for i in range(len(seeds)):
-        lives = 5
-        env.seed(seeds[i])
-        # initialize a frame set to 0s
-        frames = np.zeros((1,WINDOW_LENGTH,)+INPUT_SHAPE)
+            # reset the observation
+            observation = env.reset()
 
-        # reset the observation
-        observation = env.reset()
-
-        # process the first observation as an initial frame set
-        myframe = processor.process_state_batch(processor.process_observation(observation))
-        for i in range(WINDOW_LENGTH):
-            frames[:,i,:,:] = myframe
-
-        # initializers
-        done = False
-        while not done:
-            env.render()
-            action = np.argmax(model.predict(frames))
-            sleep(.04)
-
-            modified_action = action+1
-            observation,reward,done,info = env.step(modified_action)
-
+            # process the first observation as an initial frame set
             myframe = processor.process_state_batch(processor.process_observation(observation))
+            for i in range(WINDOW_LENGTH):
+                frames[:,i,:,:] = myframe
 
-            # move the frame along
-            frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
-            frames[:,WINDOW_LENGTH-1,:,:] = myframe
+            # initializers
+            done = False
+            while not done:
+                env.render()
+                action = np.argmax(model.predict(frames))
+                sleep(.04)
 
-            if lives != info['ale.lives']:
-                lives = info['ale.lives']
-                observation,reward,done,info = env.step(1)
-        sleep(3)
+                modified_action = action+1
+                observation,reward,done,info = env.step(modified_action)
+
+                myframe = processor.process_state_batch(processor.process_observation(observation))
+
+                # move the frame along
+                frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
+                frames[:,WINDOW_LENGTH-1,:,:] = myframe
+
+                if lives != info['ale.lives']:
+                    lives = info['ale.lives']
+                    observation,reward,done,info = env.step(1)
+            sleep(3)
+    except KeyboardInterrupt:  
+        print('Testing Ended!') 
 
 
 # #### Gym Environment set up:
