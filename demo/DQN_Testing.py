@@ -48,7 +48,7 @@ class AtariProcessor():
 
 
 def demo():
-    seeds = [2095, 274, 1770, 263, 1115, 403]
+    seeds = [2270, 2095, 274, 1770, 263, 2204, 1115, 403]
     try:
         for i in range(len(seeds)):
             lives = 5
