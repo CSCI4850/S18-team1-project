@@ -48,7 +48,7 @@ class AtariProcessor():
 
 
 def demo():
-    seeds = [2270, 2095, 274, 1770, 263, 2204, 1115]
+    seeds = [2270, 2095, 274]
     seeds.reverse()
     try:
         for i in range(len(seeds)):
@@ -69,22 +69,30 @@ def demo():
             done = False
             while not done:
                 env.render()
+
+                # get next action from network
                 action = np.argmax(model.predict(frames))
+
+                # delay for human readability
                 sleep(.04)
 
+                # perform action and save new enviornment state
                 modified_action = action+1
                 observation,reward,done,info = env.step(modified_action)
 
+                # process raw environment state
                 myframe = processor.process_state_batch(processor.process_observation(observation))
 
                 # move the frame along
                 frames[:,0:WINDOW_LENGTH-1,:,:] = frames[:,1:WINDOW_LENGTH,:,:]
                 frames[:,WINDOW_LENGTH-1,:,:] = myframe
 
+                # if frame begins new life, perform fire action to restart game
                 if lives != info['ale.lives']:
                     lives = info['ale.lives']
                     observation,reward,done,info = env.step(1)
-            sleep(3)
+
+            sleep(3) # sleep between games
     except KeyboardInterrupt:
         print('Testing Ended!')
 
@@ -129,4 +137,6 @@ model.load_weights(weights_filename)
 
 # render initial environment window
 env.render()
+
+# run demonstration
 demo()
