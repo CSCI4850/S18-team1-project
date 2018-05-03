@@ -1,3 +1,5 @@
+# NOTE: run test_seeds.py script before running this 
+
 import numpy as np
 from operator import itemgetter
 
