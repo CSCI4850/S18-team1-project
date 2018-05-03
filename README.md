@@ -2,6 +2,7 @@
 
 ## Breakout Atari Agent
 <img src="https://github.com/CSCI4850/S18-team1-project/blob/master/breakout.gif" width="200px" height="auto">
+Results of training on a GTX 1080 for 10 hours.
 
 ### Model:
 Our model consists of a Convolutional Neural Network with a preprocessed frame from Breakout of a (210, 160, 3) tuple => (84, 84) grayscale down-sized frame and a linear output size of 4 (no-op, fire, move left, move right) which gets reduced down to 3 (no-op, move left, move right) because (fire) in breakout is basically a no-op. The model uses the Adam optimizer with a logcosh, mean squared error, or huber loss function.
@@ -14,10 +15,13 @@ Our model consists of a Convolutional Neural Network with a preprocessed frame f
     scikit_image==0.13.1
     Keras==2.1.3
     gym==0.9.5
+    gym[atari]
+    h5py==2.7.1
     Pillow==5.1.0
-    skimage==0.0
+
 or just do:
-```pip install -r requirements.txt```
+```pip install -r requirements.txt```<br>
+<br>You will also need ```pip install tensorflow-gpu==1.7.0``` if you are using a GPU to train.<br>
 
 ### Python Components (located in src):
 1. <b>breakout.py</b>:
@@ -38,7 +42,7 @@ or just do:
 6. <b>sliding_frames.py</b>:
     Sliding frames into the model and memory. Less memory footprint, less backpropagation steps.
     
-7 <b>utils.py</b>:
+7. <b>utils.py</b>:
     List of utility functions used by numerous components.
 #### Breakout Main Loop: 
     'GAME' : 'BreakoutDeterministic-v4', # Name of which game to use
@@ -131,9 +135,9 @@ To start the breakout game with the DQN Agent, run ```python3 breakout.py```
 To change how the DQN Agent learns, modify hyperparameters.py
 
 ### Demo (located in demo):
-The demo consists of a short python notebook under DQN_Testing.ipynb, it renders every 6 frames.
+To start the demo, run ```python3 DQN_Testing.py```<br>
+Alternatively, there is a python notebook under DQN_Testing.ipynb which renders every 6 frames.
 <br>
-The other component is a python script that renders each frame as it plays with a specified weight.
 
 ### References:
 1. http://docs.python-guide.org/en/latest/starting/installation/
