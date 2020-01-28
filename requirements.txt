@@ -32,7 +32,7 @@ scikit-image==0.13.1
 scipy==1.0.1
 six==1.11.0
 tensorboard==1.8.0
-tensorflow==1.8.0
+tensorflow==1.15.2
 termcolor==1.1.0
 urllib3==1.22
 Werkzeug==0.14.1
